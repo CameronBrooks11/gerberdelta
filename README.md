@@ -106,14 +106,4 @@ gerberdelta diff before/ after/ --align-offset 0.5,0    # shift board B by 0.5 i
 
 ## Development
 
-```sh
-# Install with dev dependencies
-uv sync --dev
-
-# Run tests
-uv run pytest tests/ -q
-
-# Lint and type-check
-uv run ruff check gerberdelta/ tests/
-uv run mypy gerberdelta/ tests/
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, test, and lint commands.
