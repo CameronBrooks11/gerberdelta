@@ -116,12 +116,30 @@ Aperture union type:
 Gerber uses a right-handed coordinate system (+Y up). Cairo uses +Y down.
 The viewport transform applies a Y-flip:
 
-```
-screen_x = pan_x + world_x * zoom
-screen_y = pan_y - world_y * zoom
-```
+$$s_x = p_x + w_x \cdot z$$
 
-`compute_viewport` fits the board's bounding box into the canvas with a 10 %
+$$s_y = p_y - w_y \cdot z$$
+
+where $(s_x, s_y)$ are screen (pixel) coordinates, $(w_x, w_y)$ are world
+(inch) coordinates, $(p_x, p_y)$ is the pan offset, and $z$ is the zoom
+factor (pixels per inch).
+
+The zoom is computed to fit the bounding box into the canvas with a 10% margin:
+
+$$z = 0.9 \cdot \min\!\left(\frac{W}{b_w},\, \frac{H}{b_h}\right)$$
+
+where $W, H$ are the canvas dimensions in pixels and $b_w, b_h$ are the
+bounding box width and height in inches. The pan is then set so the board
+centre maps to the canvas centre:
+
+$$p_x = \frac{W}{2} - c_x \cdot z \qquad p_y = \frac{H}{2} + c_y \cdot z$$
+
+The inverse transform (`screen_to_world`) recovers world coordinates from
+pixel coordinates:
+
+$$w_x = \frac{s_x - p_x}{z} \qquad w_y = -\frac{s_y - p_y}{z}$$
+
+`compute_viewport` fits the board's bounding box into the canvas with a 10%
 margin. `merge_bounding_boxes` is used by the diff engine to derive a single
 shared viewport so both images are aligned before pixel comparison.
 
