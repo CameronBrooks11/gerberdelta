@@ -1,4 +1,4 @@
-"""Two-pass rasteriser: compile ParsedImage → render to a Cairo surface.
+"""Two-pass rasteriser: compile ParsedImage -> render to a Cairo surface.
 
 Usage
 -----
@@ -138,7 +138,7 @@ def _render_layer(
     if layer.polarity == Polarity.Clear:
         ctx.set_operator(cairo.OPERATOR_DEST_OUT)
 
-    # Optional layer-level transforms (scale → rotation → mirror).
+    # Optional layer-level transforms (scale -> rotation -> mirror).
     if layer.scale != 1.0:
         ctx.scale(layer.scale, layer.scale)
     if layer.rotation != 0.0:

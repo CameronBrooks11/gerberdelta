@@ -26,7 +26,7 @@ def test_multi_quadrant_quarter_circle_cw() -> None:
 
 
 def test_multi_quadrant_full_circle_ccw() -> None:
-    # start == end, non-zero I → full 360° arc
+    # start == end, non-zero I -> full 360deg arc
     arc = compute_arc_multi_quadrant(1.0, 0.0, 1.0, 0.0, -1.0, 0.0, clockwise=False)
     assert arc is not None
     assert abs(arc.end_angle_deg - arc.start_angle_deg - 360.0) < 1e-6
@@ -39,7 +39,7 @@ def test_multi_quadrant_full_circle_cw() -> None:
 
 
 def test_multi_quadrant_degenerate_returns_none() -> None:
-    # i=j=0 → radius 0 → degenerate
+    # i=j=0 -> radius 0 -> degenerate
     arc = compute_arc_multi_quadrant(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, clockwise=False)
     assert arc is None
 
@@ -60,7 +60,7 @@ def test_single_quadrant_quarter_circle() -> None:
     arc = compute_arc_single_quadrant(1.0, 0.0, 0.0, 1.0, 1.0, 0.0, clockwise=False)
     assert arc is not None
     assert abs(arc.radius - 1.0) < 1e-9
-    # sweep should be ≤ 90°
+    # sweep should be <= 90deg
     sweep = arc.end_angle_deg - arc.start_angle_deg
     assert 0.0 < sweep <= 90.5
 

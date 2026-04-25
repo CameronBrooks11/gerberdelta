@@ -11,7 +11,7 @@ from gerberdelta import __version__
 from gerberdelta.types import DiagnosticSeverity
 
 _EXCELLON_SUFFIXES = frozenset({".drl", ".exc", ".xln", ".ncd"})
-_MEMORY_WARN_PIXELS = 16_777_216  # 4096²
+_MEMORY_WARN_PIXELS = 16_777_216  # 4096^2
 
 
 @click.group()
@@ -115,7 +115,7 @@ def render_cmd(
     from gerberdelta.render.renderer import render_to_surface
     from gerberdelta.render.viewport import compute_viewport
 
-    # Memory warning — non-blocking.
+    # Memory warning -- non-blocking.
     total_pixels = width * height
     if total_pixels > _MEMORY_WARN_PIXELS:
         mb = (total_pixels * 4) / (1024 * 1024)
@@ -171,7 +171,7 @@ def render_cmd(
         sys.exit(1)
 
     if not quiet:
-        click.echo(f"rendered {width}x{height} → {out_png}")
+        click.echo(f"rendered {width}x{height} -> {out_png}")
     if verbose:
         click.echo(f"render time: {elapsed * 1000:.1f} ms")
         click.echo(f"nets: {len(img.nets)}  apertures: {len(img.apertures)}")

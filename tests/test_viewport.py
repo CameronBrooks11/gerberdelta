@@ -29,13 +29,13 @@ def test_compute_viewport_basic() -> None:
 def test_compute_viewport_margin() -> None:
     bb = _bbox((0.0, 0.0), (1.0, 1.0))
     vp = compute_viewport(bb, 1000, 1000)
-    # 10% margin → zoom should be 0.9 * (canvas / board_size)
+    # 10% margin -> zoom should be 0.9 * (canvas / board_size)
     expected_zoom = 0.9 * 1000.0
     assert abs(vp.zoom - expected_zoom) < 1e-6
 
 
 def test_compute_viewport_invalid_bbox() -> None:
-    bb = BoundingBox()  # invalid — no points added
+    bb = BoundingBox()  # invalid -- no points added
     vp = compute_viewport(bb, 800, 600)
     assert vp.zoom == 100.0  # default fallback
 

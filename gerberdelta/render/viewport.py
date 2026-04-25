@@ -18,7 +18,7 @@ class Viewport:
     height: int
     pan_x: float   # canvas X of the world origin
     pan_y: float   # canvas Y of the world origin (after Y-flip)
-    zoom: float    # world units → pixels
+    zoom: float    # world units -> pixels
 
 
 def compute_viewport(bbox: BoundingBox, width: int, height: int) -> Viewport:

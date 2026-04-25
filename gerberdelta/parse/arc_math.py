@@ -19,7 +19,7 @@ def compute_arc_multi_quadrant(
     """Compute arc geometry for G75 (multi-quadrant) mode.
 
     (i, j) are signed offsets from the start point to the arc centre.
-    The arc can sweep any angle up to 360°.
+    The arc can sweep any angle up to 360deg.
 
     Returns None for a degenerate arc (radius < 1e-10).
     """
@@ -64,7 +64,7 @@ def compute_arc_single_quadrant(
 
     In G74 mode the magnitude of (i, j) is always positive but the sign is
     implicit.  Try all four sign combinations and keep the candidate where the
-    arc sweep is ≤ 90° (single-quadrant constraint), preferring the one with
+    arc sweep is <= 90deg (single-quadrant constraint), preferring the one with
     the smallest start-to-end radius mismatch.
 
     Returns None if no valid candidate is found.
@@ -98,7 +98,7 @@ def compute_arc_single_quadrant(
             if sweep <= 0:
                 sweep += 360.0
 
-        # G74 constraint: arc must stay within a single quadrant (≤ 90°)
+        # G74 constraint: arc must stay within a single quadrant (<= 90deg)
         if sweep > 90.5:
             continue
 

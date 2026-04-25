@@ -161,7 +161,7 @@ class _GerberParser:
             return max(ap.width, ap.height) / 2.0
         if isinstance(ap, PolygonAperture):
             return ap.outer_diameter / 2.0
-        # MacroAperture, BlockAperture: conservative — renderer computes exact bbox
+        # MacroAperture, BlockAperture: conservative -- renderer computes exact bbox
         return 0.0
 
     def _flush_macro(self) -> None:
@@ -284,8 +284,8 @@ class _GerberParser:
                 net_state_index=self._current_net_state_idx,
             ))
         elif value in (54, 55, 70, 71):
-            # 54/55: deprecated aperture select/flash — ignore
-            # 70/71: deprecated inch/mm (should use MO instead) — update unit
+            # 54/55: deprecated aperture select/flash -- ignore
+            # 70/71: deprecated inch/mm (should use MO instead) -- update unit
             if value == 70:
                 self._unit = UnitType.Inch
             elif value == 71:
@@ -339,7 +339,7 @@ class _GerberParser:
             if prefix not in _COMMAND_PREFIXES:
                 self._macro_lines.append(body)
                 return
-            # Recognised command — flush macro first, then dispatch normally
+            # Recognised command -- flush macro first, then dispatch normally
             self._flush_macro()
 
         if prefix == "FS":
@@ -448,10 +448,10 @@ class _GerberParser:
                 self._aperture_attrs.clear()
 
         elif prefix == "TF":
-            pass  # File attribute — informational, ignored
+            pass  # File attribute -- informational, ignored
 
         elif prefix in ("IA", "AS", "MI", "OF", "SF"):
-            pass  # Deprecated image/axis attributes — safely ignored
+            pass  # Deprecated image/axis attributes -- safely ignored
 
         else:
             self._warn(f"Unknown extended command prefix {prefix!r}", line)
@@ -475,7 +475,7 @@ class _GerberParser:
                 return
             if d_code < 10:
                 self._warn(
-                    f"Invalid aperture block D-code: D{d_code} (must be ≥10)", line
+                    f"Invalid aperture block D-code: D{d_code} (must be >=10)", line
                 )
                 return
             if len(self._block_stack) >= 10:
@@ -532,7 +532,7 @@ class _GerberParser:
     def _handle_sr(self, params: str, line: int) -> None:
         """Handle the SR body after stripping the 'SR' prefix."""
         if not params.strip():
-            # Close SR block — push a fresh default layer
+            # Close SR block -- push a fresh default layer
             self._layers.append(LayerState())
             self._current_layer_idx = len(self._layers) - 1
             return

@@ -132,7 +132,7 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
                 unit = UnitType.Inch
                 unit_seen = True
             elif upper.startswith("FMAT"):
-                pass  # Excellon format version — informational
+                pass  # Excellon format version -- informational
             # Tool definition in header
             elif _TOOL_DEF_RE.match(line):
                 parse_tool_def(line)
@@ -150,7 +150,7 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
         if upper.startswith("G"):
             code = upper[1:3].lstrip("0") or "0"
             if code in ("0", "00", "5", "05", "90"):
-                pass  # drill mode / absolute — ignore
+                pass  # drill mode / absolute -- ignore
             elif code in ("1", "01"):
                 warn("G01 linear rout mode encountered (not drill)")
             elif code in ("2", "02", "3", "03"):

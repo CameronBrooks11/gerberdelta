@@ -103,7 +103,7 @@ def test_compile_empty_image() -> None:
 
 
 def test_compile_flash_batch_groups_by_aperture() -> None:
-    """Three flashes on the same aperture → one FlashBatch with three nets."""
+    """Three flashes on the same aperture -> one FlashBatch with three nets."""
     nets = [
         _net(aperture_index=10, aperture_state=ApertureState.Flash, stop_x=0.1),
         _net(aperture_index=10, aperture_state=ApertureState.Flash, stop_x=0.2),
@@ -118,7 +118,7 @@ def test_compile_flash_batch_groups_by_aperture() -> None:
 
 
 def test_compile_flash_batch_splits_on_aperture_change() -> None:
-    """Two different apertures → two FlashBatch groups."""
+    """Two different apertures -> two FlashBatch groups."""
     nets = [
         _net(aperture_index=10, aperture_state=ApertureState.Flash, stop_x=0.1),
         _net(aperture_index=11, aperture_state=ApertureState.Flash, stop_x=0.2),
@@ -131,7 +131,7 @@ def test_compile_flash_batch_splits_on_aperture_change() -> None:
 
 
 def test_compile_stroke_batch() -> None:
-    """Consecutive On-state nets → one StrokeBatch."""
+    """Consecutive On-state nets -> one StrokeBatch."""
     nets = [
         _net(aperture_index=10, aperture_state=ApertureState.On, stop_x=0.1),
         _net(aperture_index=10, aperture_state=ApertureState.On, stop_x=0.2),
@@ -144,7 +144,7 @@ def test_compile_stroke_batch() -> None:
 
 
 def test_compile_region_group() -> None:
-    """RegionStart … RegionEnd nets → one RegionGroup."""
+    """RegionStart ... RegionEnd nets -> one RegionGroup."""
     nets = [
         _net(interpolation=InterpolationMode.RegionStart, aperture_state=ApertureState.Off),
         _net(aperture_state=ApertureState.On, stop_x=0.1),
@@ -159,7 +159,7 @@ def test_compile_region_group() -> None:
 
 
 def test_compile_holed_flash() -> None:
-    """Flash on an aperture with hole_diameter set → HoledFlash."""
+    """Flash on an aperture with hole_diameter set -> HoledFlash."""
     nets = [_net(aperture_index=10, aperture_state=ApertureState.Flash)]
     aps: dict[int, Aperture] = {10: CircleAperture(diameter=0.05, hole_diameter=0.02)}
     cr = compile_render(_image_with_nets(nets, aps))
@@ -170,7 +170,7 @@ def test_compile_holed_flash() -> None:
 
 
 def test_compile_macro_flash() -> None:
-    """Flash on a MacroAperture → MacroFlash."""
+    """Flash on a MacroAperture -> MacroFlash."""
     nets = [_net(aperture_index=10, aperture_state=ApertureState.Flash)]
     aps: dict[int, Aperture] = {10: MacroAperture()}
     cr = compile_render(_image_with_nets(nets, aps))
@@ -241,7 +241,7 @@ def test_render_empty_gerber_no_crash() -> None:
     vp = compute_viewport(image.bounding_box, 100, 100)
     surface = render_to_surface(image, vp)
     assert isinstance(surface, cairo.ImageSurface)
-    # Fully transparent canvas — all bytes zero.
+    # Fully transparent canvas -- all bytes zero.
     surface.flush()
     buf = bytes(surface.get_data())
     assert all(b == 0 for b in buf)

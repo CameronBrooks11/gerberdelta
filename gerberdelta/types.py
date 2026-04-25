@@ -99,7 +99,7 @@ class BoundingBox:
     first call to expand() sets the box correctly.  Check is_valid before use.
     """
 
-    # math.inf is an immutable float constant — field(default=...) is correct.
+    # math.inf is an immutable float constant -- field(default=...) is correct.
     min_x: float = field(default=math.inf)
     min_y: float = field(default=math.inf)
     max_x: float = field(default=-math.inf)
@@ -111,7 +111,7 @@ class BoundingBox:
         return math.isfinite(self.min_x)
 
     def expand(self, x: float, y: float, radius: float = 0.0) -> None:
-        """Expand to include the point (x±radius, y±radius)."""
+        """Expand to include the point (x+/-radius, y+/-radius)."""
         self.min_x = min(self.min_x, x - radius)
         self.min_y = min(self.min_y, y - radius)
         self.max_x = max(self.max_x, x + radius)
@@ -125,8 +125,8 @@ class BoundingBox:
 
 @dataclass
 class StepAndRepeat:
-    x: int = 1          # repeat count X (≥1)
-    y: int = 1          # repeat count Y (≥1)
+    x: int = 1          # repeat count X (>=1)
+    y: int = 1          # repeat count Y (>=1)
     dist_x: float = 0.0  # step distance X in inches
     dist_y: float = 0.0  # step distance Y in inches
 
@@ -236,7 +236,7 @@ class BlockAperture:
     bounding_box: BoundingBox = field(default_factory=BoundingBox)
 
 
-# Union type alias — used for aperture dict values and type-narrowing dispatch.
+# Union type alias -- used for aperture dict values and type-narrowing dispatch.
 Aperture: TypeAlias = (
     CircleAperture | RectangleAperture | ObroundAperture
     | PolygonAperture | MacroAperture | BlockAperture
@@ -253,7 +253,7 @@ class ParsedImage:
     """The complete output of parsing one Gerber or Excellon file."""
 
     nets: list[Net]
-    apertures: dict[int, Aperture]  # D-code → aperture
+    apertures: dict[int, Aperture]  # D-code -> aperture
     layers: list[LayerState]
     net_states: list[NetState]
     bounding_box: BoundingBox

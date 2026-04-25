@@ -19,7 +19,7 @@ class LiteralNode:
 
 @dataclass
 class VariableNode:
-    index: int = 1  # $1, $2, … — 1-based
+    index: int = 1  # $1, $2, ... -- 1-based
 
 
 @dataclass
@@ -42,7 +42,7 @@ def _lit(v: float = 0.0) -> LiteralNode:
 
 
 # ---------------------------------------------------------------------------
-# Macro primitive templates  (ExprNode fields — evaluated later)
+# Macro primitive templates  (ExprNode fields -- evaluated later)
 # ---------------------------------------------------------------------------
 
 
@@ -83,7 +83,7 @@ class LineCenterPrimitive:
 class OutlinePrimitive:
     code: ClassVar[int] = 4
     exposure: ExprNode = field(default_factory=lambda: _lit(1.0))
-    vertices: list[ExprNode] = field(default_factory=list)  # flat [x0,y0,x1,y1,…]
+    vertices: list[ExprNode] = field(default_factory=list)  # flat [x0,y0,x1,y1,...]
     rotation: ExprNode = field(default_factory=_lit)
 
 
@@ -148,7 +148,7 @@ class MacroDef:
 
 
 # ---------------------------------------------------------------------------
-# Evaluated primitive types  (float fields — produced after evaluation)
+# Evaluated primitive types  (float fields -- produced after evaluation)
 # ---------------------------------------------------------------------------
 
 
@@ -285,7 +285,7 @@ def _tokenize_expr(s: str) -> list[tuple[str, str]]:
 class _ExprParser:
     """Recursive-descent parser for Gerber macro expressions.
 
-    Precedence (low → high): additive (+/-) → multiplicative (x/) → unary (-) → primary
+    Precedence (low -> high): additive (+/-) -> multiplicative (x/) -> unary (-) -> primary
     """
 
     def __init__(self, tokens: list[tuple[str, str]]) -> None:
@@ -462,7 +462,7 @@ def parse_macro_body(name: str, body: str) -> MacroDef:
     with individual statements delimited by *.  Each statement is either:
 
     - An assignment:  ``$n=<expr>``
-    - A primitive:    ``<code>,<param0>,<param1>,…``
+    - A primitive:    ``<code>,<param0>,<param1>,...``
     - A comment:      starts with ``0 `` or is the single character ``0``
     """
     items: list[MacroBodyItem] = []
@@ -480,7 +480,7 @@ def parse_macro_body(name: str, body: str) -> MacroDef:
         args = _parse_args(stmt)
         if not args:
             continue
-        # Evaluate code with an empty var_map — it must be a literal in practice
+        # Evaluate code with an empty var_map -- it must be a literal in practice
         code = round(evaluate_macro_expression(args[0], {}))
         prim = _build_primitive(code, args[1:])
         if prim is not None:

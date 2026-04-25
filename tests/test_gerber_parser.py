@@ -20,9 +20,9 @@ from gerberdelta.types import (
 
 def test_convert_leading_zero_omission_inches() -> None:
     # FSLAX25Y25: 5 total digits, 2 integer, 3 decimal
-    # (intermediate result is not asserted — only final form is)
+    # (intermediate result is not asserted -- only final form is)
     convert_coordinate(12500, "12500", 2, 3, ZeroOmission.Leading, UnitType.Inch)
-    # raw_int=12500, dec_digits=5 → 12500/100000 = 0.125 inches
+    # raw_int=12500, dec_digits=5 -> 12500/100000 = 0.125 inches
     result = convert_coordinate(12500, "12500", 2, 5, ZeroOmission.Leading, UnitType.Inch)
     assert abs(result - 0.125) < 1e-9
 
@@ -34,13 +34,13 @@ def test_convert_millimeter_to_inches() -> None:
 
 
 def test_convert_trailing_zero_omission() -> None:
-    # Trailing: "125" with int=2, dec=3 → pad to 5 → "12500" → 12500 / 10^3 = 12.5
+    # Trailing: "125" with int=2, dec=3 -> pad to 5 -> "12500" -> 12500 / 10^3 = 12.5
     result = convert_coordinate(125, "125", 2, 3, ZeroOmission.Trailing, UnitType.Inch)
     assert abs(result - 12.5) < 1e-9
 
 
 def test_convert_trailing_negative() -> None:
-    # "-125" padded to 5 digits → "-12500" → -12.5
+    # "-125" padded to 5 digits -> "-12500" -> -12.5
     result = convert_coordinate(-125, "-125", 2, 3, ZeroOmission.Trailing, UnitType.Inch)
     assert abs(result - (-12.5)) < 1e-9
 
@@ -63,7 +63,7 @@ def test_parse_format_statement_trailing() -> None:
 
 
 def test_parse_format_statement_no_prefix() -> None:
-    # Some files omit "FS" — still parseable
+    # Some files omit "FS" -- still parseable
     fs = parse_format_statement("LAX36Y36")
     assert fs is not None
     assert fs.x_integer == 3
@@ -138,7 +138,7 @@ def test_parse_aperture_definition_dcode_too_small() -> None:
 
 
 def test_parse_aperture_definition_unknown_macro() -> None:
-    # Macro name not in macro_map → None
+    # Macro name not in macro_map -> None
     assert parse_aperture_definition("ADD10MYMACRO,1.0", UnitType.Inch, {}) is None
 
 

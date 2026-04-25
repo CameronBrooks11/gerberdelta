@@ -24,7 +24,7 @@ class Token:
     type: TokenType
     value: int | str | None  # int for G/D/M/X/Y/I/J; str for EXTENDED/COMMENT; None for EOB/EOF
     line: int
-    # raw digit string for X/Y/I/J — needed by convert_coordinate for trailing-zero omission
+    # raw digit string for X/Y/I/J -- needed by convert_coordinate for trailing-zero omission
     raw: str | None = field(default=None)
 
 
@@ -59,7 +59,7 @@ def tokenize_gerber(content: str) -> Generator[Token, None, None]:
         """Consume an optional leading sign then digit characters.
 
         Returns (raw_str, parsed_int).  raw_str carries the sign (if any) and
-        all digit characters exactly as written — needed for trailing-zero-omission
+        all digit characters exactly as written -- needed for trailing-zero-omission
         coordinate scaling.  parsed_int is the signed integer value (0 on empty).
         """
         raw = ""
@@ -147,7 +147,7 @@ def tokenize_gerber(content: str) -> Generator[Token, None, None]:
             yield Token(TokenType.END_OF_BLOCK, None, tok_line)
 
         else:
-            # Unknown character — skip silently (robustness for non-standard files)
+            # Unknown character -- skip silently (robustness for non-standard files)
             advance()
 
     yield Token(TokenType.EOF, None, line)

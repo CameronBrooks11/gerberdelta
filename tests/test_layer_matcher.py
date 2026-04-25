@@ -103,7 +103,7 @@ def test_classify_legacy_gto() -> None:
 
 
 # ---------------------------------------------------------------------------
-# match_layers — synthetic directories
+# match_layers -- synthetic directories
 # ---------------------------------------------------------------------------
 
 
@@ -192,7 +192,7 @@ def test_match_layers_drill_files(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# match_layers — real fixtures
+# match_layers -- real fixtures
 # ---------------------------------------------------------------------------
 
 

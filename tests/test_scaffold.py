@@ -6,7 +6,7 @@ def test_version_string_is_defined() -> None:
     import gerberdelta
     assert hasattr(gerberdelta, "__version__")
     assert isinstance(gerberdelta.__version__, str)
-    # Check semver shape — don't hardcode the exact version
+    # Check semver shape -- don't hardcode the exact version
     parts = gerberdelta.__version__.split(".")
     assert len(parts) == 3, "version must be MAJOR.MINOR.PATCH"
 

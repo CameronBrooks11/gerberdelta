@@ -193,7 +193,7 @@ def _ccl_and_extract(
     if num_features == 0:
         return []
 
-    # Per-label bounding slices — O(H*W) single pass.
+    # Per-label bounding slices -- O(H*W) single pass.
     obj_slices = find_objects(labeled_arr)
 
     # center_of_mass with a list index always returns list[tuple[float, ...]].
@@ -218,7 +218,7 @@ def _ccl_and_extract(
         col_min = obj_slice[1].start
         col_max = obj_slice[1].stop - 1
 
-        # screen_to_world(px=col, py=row, vp) — note col is x, row is y.
+        # screen_to_world(px=col, py=row, vp) -- note col is x, row is y.
         x0, y0 = screen_to_world(col_min, row_min, vp)
         x1, y1 = screen_to_world(col_max, row_max, vp)
 

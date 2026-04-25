@@ -4,7 +4,7 @@ Thank you for your interest in contributing to **gerberdelta**!
 
 ## Development setup
 
-Requires Python ≥ 3.11 and [uv](https://docs.astral.sh/uv/).
+Requires Python >= 3.11 and [uv](https://docs.astral.sh/uv/).
 
 ```sh
 git clone https://github.com/CameronBrooks11/gerberdelta.git

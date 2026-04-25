@@ -41,7 +41,7 @@ def _gerber(*body_lines: str) -> str:
 
 
 def test_block_aperture_parsed_and_registered() -> None:
-    """A block aperture defined with %ABD10*% … %AB*% appears in apertures."""
+    """A block aperture defined with %ABD10*% ... %AB*% appears in apertures."""
     src = _gerber(
         "%ADD11C,0.1*%",  # circle aperture in the block
         "%ABD10*%",
@@ -215,7 +215,7 @@ def test_empty_block_flash_renders_cleanly() -> None:
     img = parse_gerber(src)
     vp = compute_viewport(img.bounding_box, 32, 32)
     arr = render_to_numpy(img, vp)
-    # All transparent — nothing was drawn
+    # All transparent -- nothing was drawn
     assert np.all(arr[..., 3] == 0)
 
 
@@ -255,8 +255,8 @@ def test_negative_coordinate_viewport() -> None:
     vp = compute_viewport(bbox, 256, 256)
     assert vp.zoom > 0
     # The board centre (-2, -1.25) must map to canvas centre (128, 128).
-    # screen_x = pan_x + world_x * zoom → 128 = pan_x + (-2)*zoom
-    # screen_y = pan_y - world_y * zoom → 128 = pan_y - (-1.25)*zoom
+    # screen_x = pan_x + world_x * zoom -> 128 = pan_x + (-2)*zoom
+    # screen_y = pan_y - world_y * zoom -> 128 = pan_y - (-1.25)*zoom
     center_x = (bbox.min_x + bbox.max_x) / 2.0
     center_y = (bbox.min_y + bbox.max_y) / 2.0
     screen_cx = vp.pan_x + center_x * vp.zoom

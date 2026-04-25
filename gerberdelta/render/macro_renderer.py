@@ -30,8 +30,8 @@ def draw_macro_flash(
     """Draw a macro aperture flash at world position (x, y).
 
     Evaluates all primitives in the macro definition and draws each using
-    cairocffi path operations.  Primitive exposure 0 → DEST_OUT (erase);
-    exposure 1 → OPERATOR_OVER (add).  All dimensions are scaled by
+    cairocffi path operations.  Primitive exposure 0 -> DEST_OUT (erase);
+    exposure 1 -> OPERATOR_OVER (add).  All dimensions are scaled by
     ``aperture.unit_scale``.
     """
     if aperture.macro_def is None:
@@ -147,7 +147,7 @@ def _draw_circle(
 def _draw_line_vector(
     ctx: cairo.Context, x: float, y: float, p: EvaluatedLineVector, scale: float
 ) -> None:
-    """Rotated rectangle spanning start→end with width p.width."""
+    """Rotated rectangle spanning start->end with width p.width."""
     sx = x + p.start_x * scale
     sy = y + p.start_y * scale
     ex = x + p.end_x * scale
@@ -323,7 +323,7 @@ def _draw_thermal(
     ctx.fill()
     ctx.restore()
 
-    # 2. Cut inner circle → leaves the ring
+    # 2. Cut inner circle -> leaves the ring
     if r_inner > 0.0:
         ctx.save()
         ctx.set_operator(cairo.OPERATOR_DEST_OUT)
@@ -332,7 +332,7 @@ def _draw_thermal(
         ctx.fill()
         ctx.restore()
 
-    # 3. Cut 4 rectangular gaps at 0°, 90°, 180°, 270° + rotation
+    # 3. Cut 4 rectangular gaps at 0deg, 90deg, 180deg, 270deg + rotation
     if gap_w > 0.0:
         for i in range(4):
             angle = rot + i * math.pi / 2.0

@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/gerberdelta)](https://pypi.org/project/gerberdelta/)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 
-Geometry-aware Gerber/Excellon diff tool — compare two revisions of a PCB design and highlight what changed.
+Geometry-aware Gerber/Excellon diff tool -- compare two revisions of a PCB design and highlight what changed.
 
 ## Installation
 
@@ -15,11 +15,11 @@ pip install gerberdelta
 pip install "gerberdelta[rich]"
 ```
 
-Requires Python ≥ 3.11.
+Requires Python >= 3.11.
 
 ## CLI commands
 
-### `parse` — inspect a single file
+### `parse` -- inspect a single file
 
 ```sh
 gerberdelta parse board.gbr
@@ -27,7 +27,7 @@ gerberdelta parse board.gbr --dump-ir    # JSON summary to stdout
 gerberdelta parse board.gbr --verbose    # include info-level diagnostics
 ```
 
-### `render` — rasterise a single file to PNG
+### `render` -- rasterise a single file to PNG
 
 ```sh
 gerberdelta render board.gbr --out-png board.png
@@ -35,7 +35,7 @@ gerberdelta render board.gbr --out-png board.png --width 4096 --height 4096
 gerberdelta render board.gbr --out-png board.png --overwrite
 ```
 
-### `diff` — compare two layer directories
+### `diff` -- compare two layer directories
 
 ```sh
 gerberdelta diff before/ after/
@@ -54,13 +54,13 @@ gerberdelta diff before/ after/ --align-offset 0.5,0    # shift board B by 0.5 i
 | `--min-pixels`          | 4       | Minimum pixel count for a reported region |
 | `--merge-tolerance`     | 0.05    | Region merge padding in inches            |
 | `--layer NAME`          | (all)   | Restrict to named layer (repeatable)      |
-| `--out-json PATH`       | —       | Write JSON diff report                    |
-| `--out-png DIR`         | —       | Write per-layer overlay PNGs              |
+| `--out-json PATH`       | (none)  | Write JSON diff report                    |
+| `--out-png DIR`         | (none)  | Write per-layer overlay PNGs              |
 | `--overwrite`           | false   | Allow overwriting existing output files   |
 | `--png-show-common`     | false   | Shade unchanged geometry grey in PNGs     |
 | `--align-offset X,Y`    | 0,0     | Translate board B before diffing (inches) |
 | `--fail-on-diff`        | false   | Exit 1 if any changes detected            |
-| `--quiet` / `--verbose` | —       | Suppress or expand terminal output        |
+| `--quiet` / `--verbose` | (none)  | Suppress or expand terminal output        |
 
 #### Overlay PNG colour scheme
 

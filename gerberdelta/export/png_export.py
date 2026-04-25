@@ -74,11 +74,11 @@ def build_overlay_png(
     # --- build BGRA output buffer -------------------------------------------
     out = np.zeros((height, width, 4), dtype=np.uint8)
 
-    # Removed → red   (B=0, G=0, R=255, A=255  →  BGRA: [0, 0, 255, 255])
+    # Removed -> red   (B=0, G=0, R=255, A=255  ->  BGRA: [0, 0, 255, 255])
     out[removed] = [0, 0, 255, 255]
-    # Added   → green (B=0, G=255, R=0, A=255  →  BGRA: [0, 255, 0, 255])
+    # Added   -> green (B=0, G=255, R=0, A=255  ->  BGRA: [0, 255, 0, 255])
     out[added]   = [0, 255, 0, 255]
-    # Changed (both non-zero, different value) → yellow
+    # Changed (both non-zero, different value) -> yellow
     out[changed] = [0, 255, 255, 255]
     if show_common:
         out[common] = [128, 128, 128, 255]

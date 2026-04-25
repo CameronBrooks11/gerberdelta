@@ -42,7 +42,7 @@ def test_bounding_box_expand() -> None:
     assert bb.max_x == pytest.approx(1.5)
     assert bb.max_y == pytest.approx(2.5)
 
-    # Expand again — only extends outward
+    # Expand again -- only extends outward
     bb.expand(0.0, 0.0)
     assert bb.min_x == pytest.approx(0.0)
     assert bb.min_y == pytest.approx(0.0)

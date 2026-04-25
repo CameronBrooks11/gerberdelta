@@ -39,7 +39,7 @@ body:
       description: Command(s) and minimal Gerber/Excellon input that trigger the bug.
       placeholder: |
         1. Run `gerberdelta diff before/ after/`
-        2. …
+        2. ...
     validations:
       required: true
 

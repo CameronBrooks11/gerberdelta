@@ -71,14 +71,14 @@ def test_build_overlay_identical_images_no_colour(tmp_path: Path) -> None:
     out = tmp_path / "blank.png"
     build_overlay_png(a, a, xor, out)
     assert out.exists()
-    # XOR of identical arrays is all zero → changed mask is empty.
+    # XOR of identical arrays is all zero -> changed mask is empty.
     assert np.all(xor == 0)
 
 
 def test_build_overlay_removed_pixels_red(tmp_path: Path) -> None:
     """Pixels only in A show as red (R=255, G=0, B=0) in RGBA output."""
     h, w = 8, 8
-    a = _solid(h, w, (0, 0, 255, 255))   # white in BGRA → alpha=255 in A
+    a = _solid(h, w, (0, 0, 255, 255))   # white in BGRA -> alpha=255 in A
     b = _blank(h, w)                       # transparent in B
     xor = _xor(a, b)
     out = tmp_path / "removed.png"
@@ -87,7 +87,7 @@ def test_build_overlay_removed_pixels_red(tmp_path: Path) -> None:
 
 
 def test_build_overlay_added_pixels_green(tmp_path: Path) -> None:
-    """Pixels only in B → green."""
+    """Pixels only in B -> green."""
     h, w = 8, 8
     a = _blank(h, w)
     b = _solid(h, w, (0, 0, 255, 255))

@@ -3,9 +3,9 @@
 Algorithm
 ---------
 1. List all Gerber/Excellon files in *before_dir* and *after_dir*.
-2. Exact stem match → status ``"matched"``.
-3. Unmatched in *before_dir* only → status ``"removed"``.
-4. Unmatched in *after_dir* only → status ``"added"``.
+2. Exact stem match -> status ``"matched"``.
+3. Unmatched in *before_dir* only -> status ``"removed"``.
+4. Unmatched in *after_dir* only -> status ``"added"``.
 
 Layer type detection uses suffix and stem patterns:
 
@@ -13,18 +13,18 @@ Gerber extensions:  ``.gbr .ger .gtl .gbl .gts .gbs .gto .gbo .gtp .gbp .gm1``
 Excellon extensions: ``.drl .exc .xln .ncd``
 
 Stem keyword matching (case-insensitive, substring) determines ``LayerType``:
-- ``f.cu`` or ``front copper`` → ``FCu``
-- ``b.cu`` or ``back copper``  → ``BCu``
-- ``in1.cu`` … ``in4.cu``     → ``InCu``
-- ``f.mask`` / ``b.mask``     → ``FMask`` / ``BMask``
-- ``f.paste`` / ``b.paste``   → ``FPaste`` / ``BPaste``
-- ``f.silks`` / ``f.silk``    → ``FSilk``
-- ``b.silks`` / ``b.silk``    → ``BSilk``
-- ``edge.cuts`` / ``edgecuts``→ ``EdgeCuts``
-- ``npth``                    → ``NPTH``
-- ``pth`` (but not ``npth``)  → ``PTH``
-- Excellon extension but no keyword match → ``Drill``
-- Anything else               → ``Unknown``
+- ``f.cu`` or ``front copper`` -> ``FCu``
+- ``b.cu`` or ``back copper``  -> ``BCu``
+- ``in1.cu`` ... ``in4.cu``     -> ``InCu``
+- ``f.mask`` / ``b.mask``     -> ``FMask`` / ``BMask``
+- ``f.paste`` / ``b.paste``   -> ``FPaste`` / ``BPaste``
+- ``f.silks`` / ``f.silk``    -> ``FSilk``
+- ``b.silks`` / ``b.silk``    -> ``BSilk``
+- ``edge.cuts`` / ``edgecuts``-> ``EdgeCuts``
+- ``npth``                    -> ``NPTH``
+- ``pth`` (but not ``npth``)  -> ``PTH``
+- Excellon extension but no keyword match -> ``Drill``
+- Anything else               -> ``Unknown``
 """
 
 from __future__ import annotations
@@ -73,8 +73,8 @@ class LayerPair:
     """A matched, added, or removed layer."""
 
     name: str                   # display name = common stem (or bare filename)
-    before_path: Path | None    # None → layer was added in after/
-    after_path: Path | None     # None → layer was removed from before/
+    before_path: Path | None    # None -> layer was added in after/
+    after_path: Path | None     # None -> layer was removed from before/
     layer_type: LayerType
     status: str                 # "matched" | "added" | "removed"
 
@@ -134,7 +134,7 @@ def classify_layer(path: Path) -> LayerType:
 
 
 def _index_dir(directory: Path) -> dict[str, Path]:
-    """Return a mapping of stem → Path for all layer files in *directory*."""
+    """Return a mapping of stem -> Path for all layer files in *directory*."""
     result: dict[str, Path] = {}
     if not directory.is_dir():
         return result

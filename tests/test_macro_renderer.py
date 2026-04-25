@@ -38,7 +38,7 @@ def test_circle_macro_flash_produces_pixels() -> None:
 
 
 def test_circle_exposure_0_does_not_add_pixels() -> None:
-    """Exposure=0 circle should erase pixels (DEST_OUT) — surface stays blank."""
+    """Exposure=0 circle should erase pixels (DEST_OUT) -- surface stays blank."""
     macro = parse_macro_body("ZERO", "1,0,0.05,0,0,0")
     aperture = MacroAperture(macro_def=macro, params=[], unit_scale=1.0)
     ctx, surface = _make_ctx()
@@ -165,7 +165,7 @@ def test_bounding_radius_circle() -> None:
 
 
 def test_bounding_radius_offset_circle() -> None:
-    # Circle centred at (0.1, 0) with diameter 0.05 → radius from origin = 0.1 + 0.025
+    # Circle centred at (0.1, 0) with diameter 0.05 -> radius from origin = 0.1 + 0.025
     macro = parse_macro_body("C2", "1,1,0.05,0.1,0,0")
     aperture = MacroAperture(macro_def=macro, params=[], unit_scale=1.0)
     r = compute_macro_bounding_radius(aperture)

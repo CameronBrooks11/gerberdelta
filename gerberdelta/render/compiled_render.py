@@ -6,13 +6,13 @@ that the renderer can dispatch without re-inspecting every net.
 
 Batching rules
 --------------
-* ``ApertureState.Flash`` + simple aperture (no hole) → ``FlashBatch``
+* ``ApertureState.Flash`` + simple aperture (no hole) -> ``FlashBatch``
   (grouped by aperture_code)
-* ``ApertureState.Flash`` + holed aperture → ``HoledFlash`` (one per net)
-* ``ApertureState.Flash`` + ``MacroAperture`` → ``MacroFlash`` (one per net)
-* ``ApertureState.Flash`` + ``BlockAperture`` → ``BlockFlash`` (one per net)
-* ``ApertureState.On`` → ``StrokeBatch`` (grouped by aperture_code)
-* ``InterpolationMode.RegionStart`` … ``RegionEnd`` → ``RegionGroup``
+* ``ApertureState.Flash`` + holed aperture -> ``HoledFlash`` (one per net)
+* ``ApertureState.Flash`` + ``MacroAperture`` -> ``MacroFlash`` (one per net)
+* ``ApertureState.Flash`` + ``BlockAperture`` -> ``BlockFlash`` (one per net)
+* ``ApertureState.On`` -> ``StrokeBatch`` (grouped by aperture_code)
+* ``InterpolationMode.RegionStart`` ... ``RegionEnd`` -> ``RegionGroup``
 * ``ApertureState.Off`` outside a region flushes any open stroke batch.
 
 Layer boundaries flush all open batches.
@@ -223,7 +223,7 @@ def compile_render(parsed_image: ParsedImage) -> CompiledRender:
                 _flush_flash()
                 layer.groups.append(HoledFlash(aperture_code=net.aperture_index, net=net))
             else:
-                # Simple flash — batch by aperture_code.
+                # Simple flash -- batch by aperture_code.
                 if pending_flash is None or pending_flash.aperture_code != net.aperture_index:
                     _flush_flash()
                     pending_flash = FlashBatch(aperture_code=net.aperture_index)
@@ -237,7 +237,7 @@ def compile_render(parsed_image: ParsedImage) -> CompiledRender:
                 pending_stroke = StrokeBatch(aperture_code=net.aperture_index)
             pending_stroke.nets.append(net)
 
-        # ---- Off (D02 move) — just flush open batches ----
+        # ---- Off (D02 move) -- just flush open batches ----
         elif net.aperture_state == ApertureState.Off:
             _flush_flash()
             _flush_stroke()

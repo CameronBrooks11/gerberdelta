@@ -20,7 +20,7 @@ def test_parse_minimal_excellon() -> None:
 
 
 def test_excellon_coordinates_in_inches() -> None:
-    # 25.4 mm → 1.0 inch
+    # 25.4 mm -> 1.0 inch
     content = "M48\nMETRIC,LZ\nT01C25.4\n%\nT01\nX25.4Y0.0\nM30\n"
     img = parse_excellon(content)
     assert abs(img.nets[0].stop_x - 1.0) < 1e-6

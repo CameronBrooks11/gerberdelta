@@ -68,7 +68,7 @@ def test_boxes_overlap_identical() -> None:
 def test_boxes_overlap_adjacent_no_tolerance() -> None:
     a = _bbox(0.0, 0.0, 1.0, 1.0)
     b = _bbox(1.0, 0.0, 2.0, 1.0)
-    # Exactly touching: max_x(a) == min_x(b) → not strictly separated
+    # Exactly touching: max_x(a) == min_x(b) -> not strictly separated
     assert boxes_overlap(a, b, 0.0)
 
 
@@ -82,9 +82,9 @@ def test_boxes_overlap_separated_with_tolerance() -> None:
     a = _bbox(0.0, 0.0, 1.0, 1.0)
     b = _bbox(1.5, 0.0, 2.5, 1.0)
     # Gap = 0.5; tolerance pads each box outward, effective gap = 0.5 - 2*tol.
-    # tolerance 0.2 → effective gap 0.1 → no overlap
+    # tolerance 0.2 -> effective gap 0.1 -> no overlap
     assert not boxes_overlap(a, b, 0.2)
-    # tolerance 0.3 → effective gap -0.1 → overlap
+    # tolerance 0.3 -> effective gap -0.1 -> overlap
     assert boxes_overlap(a, b, 0.3)
 
 
@@ -156,9 +156,9 @@ def test_merge_overlapping_regions_distant_no_merge() -> None:
 def test_merge_overlapping_regions_sort_order() -> None:
     """After merging, regions sorted by descending centroid_y, then asc centroid_x."""
     regions = [
-        _region(1, 0.0, 0.0, 0.1, 0.1),    # centroid_y ≈ 0.05
-        _region(2, 0.0, 5.0, 0.1, 5.1),    # centroid_y ≈ 5.05  (highest)
-        _region(3, 0.0, 2.0, 0.1, 2.1),    # centroid_y ≈ 2.05
+        _region(1, 0.0, 0.0, 0.1, 0.1),    # centroid_y ~= 0.05
+        _region(2, 0.0, 5.0, 0.1, 5.1),    # centroid_y ~= 5.05  (highest)
+        _region(3, 0.0, 2.0, 0.1, 2.1),    # centroid_y ~= 2.05
     ]
     result = merge_overlapping_regions(regions, tolerance=0.0)
     assert len(result) == 3

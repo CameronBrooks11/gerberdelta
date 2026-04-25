@@ -108,7 +108,7 @@ def parse_format_statement(s: str) -> FormatStatement | None:
     else:
         coord_mode = CoordinateMode.Absolute
 
-    # X digits — expect 'X' followed by two digit characters
+    # X digits -- expect 'X' followed by two digit characters
     if idx >= len(body) or body[idx] != "X":
         return None
     idx += 1
@@ -121,7 +121,7 @@ def parse_format_statement(s: str) -> FormatStatement | None:
     if not (0 <= x_int <= 9 and 0 <= x_dec <= 9):
         return None
 
-    # Y digits — expect 'Y' followed by two digit characters
+    # Y digits -- expect 'Y' followed by two digit characters
     if idx >= len(body) or body[idx] != "Y":
         return None
     idx += 1
@@ -159,7 +159,7 @@ def parse_aperture_definition(
     Unit scale: parameters in mm files are divided by 25.4; all output is in inches.
 
     Macro apertures: look up name in macro_map; store raw params (NOT scaled) and
-    unit_scale on the aperture — the renderer applies scaling at draw time.
+    unit_scale on the aperture -- the renderer applies scaling at draw time.
     """
     # Strip optional "AD" prefix
     body = s[2:] if s.startswith("AD") else s
@@ -167,7 +167,7 @@ def parse_aperture_definition(
     if not body or body[0] != "D":
         return None
 
-    # Read d_code digits (must be ≥ 10)
+    # Read d_code digits (must be >= 10)
     i = 1
     while i < len(body) and body[i].isdigit():
         i += 1
@@ -190,7 +190,7 @@ def parse_aperture_definition(
 
     params = [float(p) for p in params_str.split("X")] if params_str else []
 
-    # Unit scale factor: mm → inch
+    # Unit scale factor: mm -> inch
     unit_scale = 1.0 / 25.4 if unit == UnitType.Millimeter else 1.0
 
     if aperture_name == "C":
@@ -221,7 +221,7 @@ def parse_aperture_definition(
             hole_diameter=params[3] * unit_scale if len(params) > 3 else None,
         )
 
-    # Macro aperture — look up definition by name
+    # Macro aperture -- look up definition by name
     macro_def = macro_map.get(aperture_name)
     if macro_def is None:
         return None

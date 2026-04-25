@@ -123,7 +123,7 @@ def draw_flash(ctx: cairo.Context, net: Net, aperture: Aperture | None) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Private helpers — each takes a concrete aperture type for mypy narrowing
+# Private helpers -- each takes a concrete aperture type for mypy narrowing
 # ---------------------------------------------------------------------------
 
 
