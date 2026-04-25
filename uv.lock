@@ -215,18 +215,16 @@ toml = [
 
 [[package]]
 name = "gerberdelta"
-version = "0.8.0"
+version = "0.9.0"
 source = { editable = "." }
 dependencies = [
     { name = "cairocffi" },
     { name = "click" },
     { name = "numpy" },
+    { name = "scipy" },
 ]
 
 [package.optional-dependencies]
-fast = [
-    { name = "scipy" },
-]
 rich = [
     { name = "rich" },
 ]
@@ -245,9 +243,9 @@ requires-dist = [
     { name = "click", specifier = ">=8" },
     { name = "numpy", specifier = ">=1.24" },
     { name = "rich", marker = "extra == 'rich'", specifier = ">=13" },
-    { name = "scipy", marker = "extra == 'fast'", specifier = ">=1.10" },
+    { name = "scipy", specifier = ">=1.10" },
 ]
-provides-extras = ["rich", "fast"]
+provides-extras = ["rich"]
 
 [package.metadata.requires-dev]
 dev = [

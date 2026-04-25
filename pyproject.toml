@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gerberdelta"
-version = "0.9.0"
+version = "0.10.0"
 description = "Geometry-aware Gerber/Excellon diff tool"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -13,13 +13,12 @@ dependencies = [
     "click>=8",
     "numpy>=1.24",
     "cairocffi>=1.6",
+    "scipy>=1.10",
 ]
 
 [project.optional-dependencies]
 # Installed by end users who want prettier terminal output
 rich = ["rich>=13"]
-# Optional fast CCL backend — strongly recommended for any image larger than ~512×512
-fast = ["scipy>=1.10"]
 
 [dependency-groups]
 # Dev tools — NOT distributed with the package; managed by uv only
@@ -72,8 +71,8 @@ warn_unused_ignores     = true
 extra_checks            = true
 
 [[tool.mypy.overrides]]
-# cairocffi and scipy ship no stub packages; ignore missing imports project-wide
-module = ["cairocffi.*", "scipy.*"]
+# cairocffi ships no stub package; ignore missing imports
+module = ["cairocffi.*"]
 ignore_missing_imports = true
 
 # ── coverage ─────────────────────────────────────────────────────────────────
