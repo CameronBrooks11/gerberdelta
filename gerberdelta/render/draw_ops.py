@@ -137,9 +137,7 @@ def _draw_hole(ctx: cairo.Context, x: float, y: float, hole_diameter: float) -> 
     ctx.restore()
 
 
-def _draw_circle_flash(
-    ctx: cairo.Context, x: float, y: float, ap: CircleAperture
-) -> None:
+def _draw_circle_flash(ctx: cairo.Context, x: float, y: float, ap: CircleAperture) -> None:
     ctx.new_path()
     ctx.arc(x, y, ap.diameter / 2.0, 0.0, 2.0 * math.pi)
     ctx.fill()
@@ -147,9 +145,7 @@ def _draw_circle_flash(
         _draw_hole(ctx, x, y, ap.hole_diameter)
 
 
-def _draw_rectangle_flash(
-    ctx: cairo.Context, x: float, y: float, ap: RectangleAperture
-) -> None:
+def _draw_rectangle_flash(ctx: cairo.Context, x: float, y: float, ap: RectangleAperture) -> None:
     w2, h2 = ap.width / 2.0, ap.height / 2.0
     ctx.new_path()
     ctx.rectangle(x - w2, y - h2, ap.width, ap.height)
@@ -158,9 +154,7 @@ def _draw_rectangle_flash(
         _draw_hole(ctx, x, y, ap.hole_diameter)
 
 
-def _draw_obround_flash(
-    ctx: cairo.Context, x: float, y: float, ap: ObroundAperture
-) -> None:
+def _draw_obround_flash(ctx: cairo.Context, x: float, y: float, ap: ObroundAperture) -> None:
     """Obround: rectangle with semicircular ends on the short axis."""
     w, h = ap.width, ap.height
     r = min(w, h) / 2.0
@@ -180,9 +174,7 @@ def _draw_obround_flash(
         _draw_hole(ctx, x, y, ap.hole_diameter)
 
 
-def _draw_polygon_flash(
-    ctx: cairo.Context, x: float, y: float, ap: PolygonAperture
-) -> None:
+def _draw_polygon_flash(ctx: cairo.Context, x: float, y: float, ap: PolygonAperture) -> None:
     r = ap.outer_diameter / 2.0
     n = ap.num_vertices
     rot = math.radians(ap.rotation)

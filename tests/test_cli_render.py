@@ -65,8 +65,15 @@ def test_render_overwrite_flag(tmp_path: Path) -> None:
     out = tmp_path / "fcu.png"
     out.write_bytes(b"existing")
     result = _run(
-        "render", str(_FCU), "--out-png", str(out),
-        "--width", "64", "--height", "64", "--overwrite",
+        "render",
+        str(_FCU),
+        "--out-png",
+        str(out),
+        "--width",
+        "64",
+        "--height",
+        "64",
+        "--overwrite",
     )
     assert result.exit_code == 0, result.output
     assert out.stat().st_size > 100
@@ -85,8 +92,14 @@ def test_render_memory_warning(tmp_path: Path) -> None:
     """Canvas > 4096x4096 should print a warning to stderr but still succeed."""
     out = tmp_path / "big.png"
     result = _run(
-        "render", str(_FCU), "--out-png", str(out),
-        "--width", "4097", "--height", "4097",
+        "render",
+        str(_FCU),
+        "--out-png",
+        str(out),
+        "--width",
+        "4097",
+        "--height",
+        "4097",
     )
     # Warning goes to stderr; exit should be 0
     assert result.exit_code == 0, result.output
@@ -97,8 +110,15 @@ def test_render_memory_warning(tmp_path: Path) -> None:
 def test_render_verbose_output(tmp_path: Path) -> None:
     out = tmp_path / "fcu.png"
     result = _run(
-        "render", str(_FCU), "--out-png", str(out),
-        "--width", "128", "--height", "128", "--verbose",
+        "render",
+        str(_FCU),
+        "--out-png",
+        str(out),
+        "--width",
+        "128",
+        "--height",
+        "128",
+        "--verbose",
     )
     assert result.exit_code == 0, result.output
     assert "render time" in result.output
@@ -109,8 +129,15 @@ def test_render_verbose_output(tmp_path: Path) -> None:
 def test_render_quiet_no_stdout(tmp_path: Path) -> None:
     out = tmp_path / "fcu.png"
     result = _run(
-        "render", str(_FCU), "--out-png", str(out),
-        "--width", "128", "--height", "128", "--quiet",
+        "render",
+        str(_FCU),
+        "--out-png",
+        str(out),
+        "--width",
+        "128",
+        "--height",
+        "128",
+        "--quiet",
     )
     assert result.exit_code == 0, result.output
     assert result.output.strip() == ""

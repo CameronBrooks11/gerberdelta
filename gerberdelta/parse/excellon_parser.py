@@ -88,17 +88,19 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
         x_in = _to_inches(x_val if x_val is not None else 0.0, unit)
         y_in = _to_inches(y_val if y_val is not None else 0.0, unit)
 
-        nets.append(Net(
-            start_x=x_in,
-            start_y=y_in,
-            stop_x=x_in,
-            stop_y=y_in,
-            aperture_index=current_tool,
-            aperture_state=ApertureState.Flash,
-            interpolation=InterpolationMode.Linear,
-            layer_index=0,
-            net_state_index=0,
-        ))
+        nets.append(
+            Net(
+                start_x=x_in,
+                start_y=y_in,
+                stop_x=x_in,
+                stop_y=y_in,
+                aperture_index=current_tool,
+                aperture_state=ApertureState.Flash,
+                interpolation=InterpolationMode.Linear,
+                layer_index=0,
+                net_state_index=0,
+            )
+        )
 
         # Bounding box: expand by tool radius
         ap = apertures.get(current_tool)
@@ -187,11 +189,13 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
         # Anything else: ignore silently (R-codes, comments without ';', etc.)
 
     if not unit_seen:
-        diagnostics.append(Diagnostic(
-            DiagnosticSeverity.Warning,
-            "No unit declaration found; defaulting to METRIC",
-            None,
-        ))
+        diagnostics.append(
+            Diagnostic(
+                DiagnosticSeverity.Warning,
+                "No unit declaration found; defaulting to METRIC",
+                None,
+            )
+        )
 
     return ParsedImage(
         nets=nets,

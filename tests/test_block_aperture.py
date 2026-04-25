@@ -104,7 +104,7 @@ def test_block_aperture_parent_apertures_accessible() -> None:
     src = _gerber(
         "%ADD11C,0.05*%",  # defined before block
         "%ABD10*%",
-        "D11*",           # use parent aperture inside block
+        "D11*",  # use parent aperture inside block
         "X05000Y05000D03*",
         "%AB*%",
     )
@@ -189,7 +189,7 @@ def test_block_flash_renders_without_crash() -> None:
 def test_block_flash_produces_non_empty_render() -> None:
     """A board with only a block flash produces some non-transparent pixels."""
     src = _gerber(
-        "%ADD11C,0.1*%",   # 0.1-inch circle
+        "%ADD11C,0.1*%",  # 0.1-inch circle
         "%ABD10*%",
         "D11*",
         "X00000Y00000D03*",
@@ -270,11 +270,15 @@ def test_negative_coordinate_render_non_empty() -> None:
     # Build a ParsedImage with a flash at (-1.0, -1.0)
     ap: dict[int, object] = {10: CircleAperture(diameter=0.1)}
     net = Net(
-        start_x=-1.0, start_y=-1.0,
-        stop_x=-1.0, stop_y=-1.0,
+        start_x=-1.0,
+        start_y=-1.0,
+        stop_x=-1.0,
+        stop_y=-1.0,
         aperture_index=10,
         aperture_state=ApertureState.Flash,
-        interpolation=__import__("gerberdelta.types", fromlist=["InterpolationMode"]).InterpolationMode.Linear,
+        interpolation=__import__(
+            "gerberdelta.types", fromlist=["InterpolationMode"]
+        ).InterpolationMode.Linear,
         layer_index=0,
         net_state_index=0,
     )

@@ -24,8 +24,8 @@ class FormatStatement:
 
     zero_omission: ZeroOmission
     coordinate_mode: CoordinateMode
-    x_integer: int   # number of integer digits for X coordinates
-    x_decimal: int   # number of decimal digits for X coordinates
+    x_integer: int  # number of integer digits for X coordinates
+    x_decimal: int  # number of decimal digits for X coordinates
     y_integer: int
     y_decimal: int
 
@@ -147,7 +147,12 @@ def parse_aperture_definition(
     s: str,
     unit: UnitType,
     macro_map: dict[str, MacroDef],
-) -> tuple[int, CircleAperture | RectangleAperture | ObroundAperture | PolygonAperture | MacroAperture] | None:
+) -> (
+    tuple[
+        int, CircleAperture | RectangleAperture | ObroundAperture | PolygonAperture | MacroAperture
+    ]
+    | None
+):
     """Parse an AD... extended command string (without the % delimiters).
 
     Returns (d_code, aperture) or None if unparseable.

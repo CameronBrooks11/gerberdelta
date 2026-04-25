@@ -65,9 +65,9 @@ def build_overlay_png(
     alpha_a: np.ndarray = arr_a[..., 3] > 0
     alpha_b: np.ndarray = arr_b[..., 3] > 0
 
-    removed = xor_mask & alpha_a & ~alpha_b   # in A, not in B
-    added   = xor_mask & alpha_b & ~alpha_a   # in B, not in A
-    changed = xor_mask & ~removed & ~added    # both non-zero but different colour
+    removed = xor_mask & alpha_a & ~alpha_b  # in A, not in B
+    added = xor_mask & alpha_b & ~alpha_a  # in B, not in A
+    changed = xor_mask & ~removed & ~added  # both non-zero but different colour
     if show_common:
         common = alpha_a & alpha_b & ~xor_mask
 
@@ -77,7 +77,7 @@ def build_overlay_png(
     # Removed -> red   (B=0, G=0, R=255, A=255  ->  BGRA: [0, 0, 255, 255])
     out[removed] = [0, 0, 255, 255]
     # Added   -> green (B=0, G=255, R=0, A=255  ->  BGRA: [0, 255, 0, 255])
-    out[added]   = [0, 255, 0, 255]
+    out[added] = [0, 255, 0, 255]
     # Changed (both non-zero, different value) -> yellow
     out[changed] = [0, 255, 255, 255]
     if show_common:

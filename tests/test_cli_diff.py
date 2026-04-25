@@ -65,8 +65,13 @@ def test_diff_empty_dirs_no_fail_on_diff(tmp_path: Path) -> None:
 @pytest.mark.skipif(not _FIXTURES_EXIST, reason="fixtures not found")
 def test_diff_identical_dirs_exits_0(tmp_path: Path) -> None:
     result = _run(
-        "diff", str(_FIXTURES_BEFORE), str(_FIXTURES_BEFORE),
-        "--width", "128", "--height", "128",
+        "diff",
+        str(_FIXTURES_BEFORE),
+        str(_FIXTURES_BEFORE),
+        "--width",
+        "128",
+        "--height",
+        "128",
     )
     assert result.exit_code == 0, result.output
 
@@ -74,8 +79,14 @@ def test_diff_identical_dirs_exits_0(tmp_path: Path) -> None:
 @pytest.mark.skipif(not _FIXTURES_EXIST, reason="fixtures not found")
 def test_diff_identical_no_fail_on_diff(tmp_path: Path) -> None:
     result = _run(
-        "diff", str(_FIXTURES_BEFORE), str(_FIXTURES_BEFORE),
-        "--width", "128", "--height", "128", "--fail-on-diff",
+        "diff",
+        str(_FIXTURES_BEFORE),
+        str(_FIXTURES_BEFORE),
+        "--width",
+        "128",
+        "--height",
+        "128",
+        "--fail-on-diff",
     )
     assert result.exit_code == 0, result.output
 
@@ -83,8 +94,13 @@ def test_diff_identical_no_fail_on_diff(tmp_path: Path) -> None:
 @pytest.mark.skipif(not _FIXTURES_EXIST, reason="fixtures not found")
 def test_diff_before_after_has_changes(tmp_path: Path) -> None:
     result = _run(
-        "diff", str(_FIXTURES_BEFORE), str(_FIXTURES_AFTER),
-        "--width", "256", "--height", "256",
+        "diff",
+        str(_FIXTURES_BEFORE),
+        str(_FIXTURES_AFTER),
+        "--width",
+        "256",
+        "--height",
+        "256",
     )
     assert result.exit_code == 0, result.output
     assert "changed" in result.output.lower()
@@ -93,8 +109,14 @@ def test_diff_before_after_has_changes(tmp_path: Path) -> None:
 @pytest.mark.skipif(not _FIXTURES_EXIST, reason="fixtures not found")
 def test_diff_fail_on_diff_exits_1(tmp_path: Path) -> None:
     result = _run(
-        "diff", str(_FIXTURES_BEFORE), str(_FIXTURES_AFTER),
-        "--width", "128", "--height", "128", "--fail-on-diff",
+        "diff",
+        str(_FIXTURES_BEFORE),
+        str(_FIXTURES_AFTER),
+        "--width",
+        "128",
+        "--height",
+        "128",
+        "--fail-on-diff",
     )
     assert result.exit_code == 1
 
@@ -103,9 +125,15 @@ def test_diff_fail_on_diff_exits_1(tmp_path: Path) -> None:
 def test_diff_json_report_written(tmp_path: Path) -> None:
     out_json = tmp_path / "report.json"
     result = _run(
-        "diff", str(_FIXTURES_BEFORE), str(_FIXTURES_AFTER),
-        "--width", "128", "--height", "128",
-        "--out-json", str(out_json),
+        "diff",
+        str(_FIXTURES_BEFORE),
+        str(_FIXTURES_AFTER),
+        "--width",
+        "128",
+        "--height",
+        "128",
+        "--out-json",
+        str(out_json),
     )
     assert result.exit_code == 0, result.output
     assert out_json.exists()
@@ -120,9 +148,15 @@ def test_diff_json_no_overwrite(tmp_path: Path) -> None:
     out_json = tmp_path / "report.json"
     out_json.write_text("{}")
     result = _run(
-        "diff", str(_FIXTURES_BEFORE), str(_FIXTURES_AFTER),
-        "--width", "64", "--height", "64",
-        "--out-json", str(out_json),
+        "diff",
+        str(_FIXTURES_BEFORE),
+        str(_FIXTURES_AFTER),
+        "--width",
+        "64",
+        "--height",
+        "64",
+        "--out-json",
+        str(out_json),
     )
     assert result.exit_code == 1
     assert out_json.read_text() == "{}"
@@ -132,9 +166,15 @@ def test_diff_json_no_overwrite(tmp_path: Path) -> None:
 def test_diff_png_output_written(tmp_path: Path) -> None:
     png_dir = tmp_path / "pngs"
     result = _run(
-        "diff", str(_FIXTURES_BEFORE), str(_FIXTURES_AFTER),
-        "--width", "64", "--height", "64",
-        "--out-png", str(png_dir),
+        "diff",
+        str(_FIXTURES_BEFORE),
+        str(_FIXTURES_AFTER),
+        "--width",
+        "64",
+        "--height",
+        "64",
+        "--out-png",
+        str(png_dir),
     )
     assert result.exit_code == 0, result.output
     pngs = list(png_dir.glob("*_diff.png"))
@@ -145,9 +185,15 @@ def test_diff_png_output_written(tmp_path: Path) -> None:
 def test_diff_layer_filter(tmp_path: Path) -> None:
     """--layer restricts output to named layer only."""
     result = _run(
-        "diff", str(_FIXTURES_BEFORE), str(_FIXTURES_AFTER),
-        "--width", "128", "--height", "128",
-        "--layer", "A64-OlinuXino-F.Cu",
+        "diff",
+        str(_FIXTURES_BEFORE),
+        str(_FIXTURES_AFTER),
+        "--width",
+        "128",
+        "--height",
+        "128",
+        "--layer",
+        "A64-OlinuXino-F.Cu",
     )
     assert result.exit_code == 0, result.output
 
@@ -155,9 +201,15 @@ def test_diff_layer_filter(tmp_path: Path) -> None:
 @pytest.mark.skipif(not _FIXTURES_EXIST, reason="fixtures not found")
 def test_diff_verbose_output(tmp_path: Path) -> None:
     result = _run(
-        "diff", str(_FIXTURES_BEFORE), str(_FIXTURES_AFTER),
-        "--width", "64", "--height", "64",
-        "--layer", "A64-OlinuXino-F.Cu",
+        "diff",
+        str(_FIXTURES_BEFORE),
+        str(_FIXTURES_AFTER),
+        "--width",
+        "64",
+        "--height",
+        "64",
+        "--layer",
+        "A64-OlinuXino-F.Cu",
         "--verbose",
     )
     assert result.exit_code == 0, result.output
@@ -167,8 +219,14 @@ def test_diff_verbose_output(tmp_path: Path) -> None:
 @pytest.mark.skipif(not _FIXTURES_EXIST, reason="fixtures not found")
 def test_diff_quiet_no_stdout(tmp_path: Path) -> None:
     result = _run(
-        "diff", str(_FIXTURES_BEFORE), str(_FIXTURES_BEFORE),
-        "--width", "64", "--height", "64", "--quiet",
+        "diff",
+        str(_FIXTURES_BEFORE),
+        str(_FIXTURES_BEFORE),
+        "--width",
+        "64",
+        "--height",
+        "64",
+        "--quiet",
     )
     assert result.exit_code == 0
     assert result.output.strip() == ""

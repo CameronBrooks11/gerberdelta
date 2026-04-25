@@ -56,12 +56,10 @@ def test_no_format_statement_adds_info_diagnostic() -> None:
 
 def test_region_fill_markers_in_net_list() -> None:
     # G36/G37 should produce RegionStart/RegionEnd sentinel nets
-    content = (
-        "%FSLAX25Y25*%%MOIN*%%ADD10C,0.001*%"
-        "G36*X10000Y10000D01*X20000D01*G37*M02*"
-    )
+    content = "%FSLAX25Y25*%%MOIN*%%ADD10C,0.001*%G36*X10000Y10000D01*X20000D01*G37*M02*"
     img = parse_gerber(content)
     from gerberdelta.types import InterpolationMode
+
     modes = [n.interpolation for n in img.nets]
     assert InterpolationMode.RegionStart in modes
     assert InterpolationMode.RegionEnd in modes
@@ -75,9 +73,7 @@ def test_aperture_select_does_not_emit_net() -> None:
 
 
 def test_multiple_apertures_defined() -> None:
-    content = (
-        "%FSLAX25Y25*%%MOIN*%%ADD10C,0.01*%%ADD11R,0.02X0.03*%%ADD12O,0.04X0.02*%M02*"
-    )
+    content = "%FSLAX25Y25*%%MOIN*%%ADD10C,0.01*%%ADD11R,0.02X0.03*%%ADD12O,0.04X0.02*%M02*"
     img = parse_gerber(content)
     assert 10 in img.apertures
     assert 11 in img.apertures
@@ -89,15 +85,7 @@ def test_multiple_apertures_defined() -> None:
 
 def test_linear_draw_sequence() -> None:
     # Three successive D01 blocks should produce three nets
-    content = (
-        "%FSLAX25Y25*%%MOIN*%"
-        "D10*"
-        "X0Y0D02*"
-        "X10000Y0D01*"
-        "X10000Y10000D01*"
-        "X0Y10000D01*"
-        "M02*"
-    )
+    content = "%FSLAX25Y25*%%MOIN*%D10*X0Y0D02*X10000Y0D01*X10000Y10000D01*X0Y10000D01*M02*"
     img = parse_gerber(content)
     # D02 (move) + 3x D01 (draw) = 4 nets total
     assert len(img.nets) == 4

@@ -186,26 +186,44 @@ def render_cmd(
 @click.argument("before_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.argument("after_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.option(
-    "--layer", "layers", multiple=True,
+    "--layer",
+    "layers",
+    multiple=True,
     help="Restrict diff to this layer name (repeatable).",
 )
 @click.option("--width", default=2048, show_default=True, help="Canvas width in pixels.")
 @click.option("--height", default=2048, show_default=True, help="Canvas height in pixels.")
-@click.option("--min-pixels", default=4, show_default=True,
-              help="Minimum changed-pixel count to report a region.")
-@click.option("--merge-tolerance", default=0.05, show_default=True,
-              help="Region merge padding in inches.")
-@click.option("--out-json", type=click.Path(dir_okay=False, path_type=Path),
-              help="Write JSON report to this file.")
-@click.option("--out-png", "out_png_dir", type=click.Path(file_okay=False, path_type=Path),
-              help="Write diff overlay PNG(s) to this directory.")
+@click.option(
+    "--min-pixels",
+    default=4,
+    show_default=True,
+    help="Minimum changed-pixel count to report a region.",
+)
+@click.option(
+    "--merge-tolerance", default=0.05, show_default=True, help="Region merge padding in inches."
+)
+@click.option(
+    "--out-json",
+    type=click.Path(dir_okay=False, path_type=Path),
+    help="Write JSON report to this file.",
+)
+@click.option(
+    "--out-png",
+    "out_png_dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    help="Write diff overlay PNG(s) to this directory.",
+)
 @click.option("--overwrite", is_flag=True, help="Allow overwriting existing output files.")
-@click.option("--png-show-common", is_flag=True,
-              help="Include unchanged geometry as grey in PNG overlay.")
-@click.option("--align-offset", default="0,0", show_default=True,
-              help="Translate image B by X,Y inches before diffing (e.g. '0.5,0').")
-@click.option("--fail-on-diff", is_flag=True,
-              help="Exit with code 1 if any changes are detected.")
+@click.option(
+    "--png-show-common", is_flag=True, help="Include unchanged geometry as grey in PNG overlay."
+)
+@click.option(
+    "--align-offset",
+    default="0,0",
+    show_default=True,
+    help="Translate image B by X,Y inches before diffing (e.g. '0.5,0').",
+)
+@click.option("--fail-on-diff", is_flag=True, help="Exit with code 1 if any changes are detected.")
 @click.option("-q", "--quiet", is_flag=True, help="Suppress all output except errors.")
 @click.option("-v", "--verbose", is_flag=True, help="Print per-layer and per-region detail.")
 def diff_cmd(
@@ -243,8 +261,9 @@ def diff_cmd(
         if alignment_offset == (0.0, 0.0):
             alignment_offset = None
     except ValueError:
-        click.echo("error: --align-offset must be two comma-separated floats (e.g. '0.5,0')",
-                   err=True)
+        click.echo(
+            "error: --align-offset must be two comma-separated floats (e.g. '0.5,0')", err=True
+        )
         sys.exit(2)
 
     # Memory warning
@@ -309,8 +328,9 @@ def diff_cmd(
             return parse_gerber(content, source_path=path)
 
         from gerberdelta.types import ParsedImage as _PI
+
         img_a: _PI = _parse(pair.before_path)  # type: ignore[assignment]
-        img_b: _PI = _parse(pair.after_path)   # type: ignore[assignment]
+        img_b: _PI = _parse(pair.after_path)  # type: ignore[assignment]
 
         # Abort on parse errors.
         for img, path in ((img_a, pair.before_path), (img_b, pair.after_path)):
@@ -323,8 +343,10 @@ def diff_cmd(
                     click.echo(f"warning: {path.name}: {diag.message}{loc}", err=True)
 
         result = compute_diff(
-            img_a, img_b,
-            width=width, height=height,
+            img_a,
+            img_b,
+            width=width,
+            height=height,
             alignment_offset=alignment_offset,
             min_pixel_count=min_pixels,
             merge_tolerance=merge_tolerance,
@@ -357,18 +379,19 @@ def diff_cmd(
             png_path = out_png_dir / f"{pair.name}_diff.png"
             try:
                 build_overlay_png(
-                    result.arr_a, result.arr_b, result.xor,
-                    png_path, show_common=png_show_common, overwrite=overwrite,
+                    result.arr_a,
+                    result.arr_b,
+                    result.xor,
+                    png_path,
+                    show_common=png_show_common,
+                    overwrite=overwrite,
                 )
             except FileExistsError as exc:
                 click.echo(f"error: {exc}  (use --overwrite to replace)", err=True)
                 sys.exit(1)
 
     # Build DiffResult
-    has_changes = any(
-        lr.changed_pixel_count > 0 or lr.status != "matched"
-        for lr in layer_results
-    )
+    has_changes = any(lr.changed_pixel_count > 0 or lr.status != "matched" for lr in layer_results)
     diff_result = DiffResult(layers=layer_results, has_changes=has_changes)
 
     # JSON report
@@ -384,8 +407,7 @@ def diff_cmd(
     # Terminal summary
     if not quiet:
         changed_layers = sum(
-            1 for lr in layer_results
-            if lr.changed_pixel_count > 0 or lr.status != "matched"
+            1 for lr in layer_results if lr.changed_pixel_count > 0 or lr.status != "matched"
         )
         click.echo(
             f"diff: {changed_layers}/{len(layer_results)} layers changed  "

@@ -40,10 +40,7 @@ def test_excellon_bbox_valid() -> None:
 
 
 def test_excellon_multiple_tools() -> None:
-    content = (
-        "M48\nMETRIC,LZ\nT01C0.3\nT02C0.8\n%\n"
-        "T01\nX1.0Y1.0\nT02\nX2.0Y2.0\nM30\n"
-    )
+    content = "M48\nMETRIC,LZ\nT01C0.3\nT02C0.8\n%\nT01\nX1.0Y1.0\nT02\nX2.0Y2.0\nM30\n"
     img = parse_excellon(content)
     assert 1 in img.apertures
     assert 2 in img.apertures

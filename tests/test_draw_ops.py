@@ -26,8 +26,10 @@ def _make_ctx(w: int = 100, h: int = 100) -> tuple[cairo.Context, cairo.ImageSur
 
 def _flash_net() -> Net:
     return Net(
-        start_x=0.0, start_y=0.0,
-        stop_x=5.0, stop_y=5.0,
+        start_x=0.0,
+        start_y=0.0,
+        stop_x=5.0,
+        stop_y=5.0,
         aperture_index=10,
         aperture_state=ApertureState.Flash,
         interpolation=InterpolationMode.Linear,
@@ -38,8 +40,10 @@ def _flash_net() -> Net:
 
 def _stroke_net() -> Net:
     return Net(
-        start_x=1.0, start_y=1.0,
-        stop_x=4.0, stop_y=4.0,
+        start_x=1.0,
+        start_y=1.0,
+        stop_x=4.0,
+        stop_y=4.0,
         aperture_index=10,
         aperture_state=ApertureState.On,
         interpolation=InterpolationMode.Linear,
@@ -49,6 +53,7 @@ def _stroke_net() -> Net:
 
 
 # ---- flash tests ----
+
 
 def test_circle_flash_no_crash() -> None:
     ctx, _ = _make_ctx()
@@ -92,6 +97,7 @@ def test_flash_none_aperture_no_crash() -> None:
 
 # ---- stroke tests ----
 
+
 def test_stroke_circle_no_crash() -> None:
     ctx, _ = _make_ctx()
     draw_net_as_stroke(ctx, _stroke_net(), CircleAperture(diameter=0.1))
@@ -109,15 +115,20 @@ def test_stroke_none_aperture_no_crash() -> None:
 
 # ---- arc tests ----
 
+
 def test_arc_path_ccw_no_crash() -> None:
     ctx, _ = _make_ctx()
-    arc = ArcSegment(center_x=5.0, center_y=5.0, radius=2.0, start_angle_deg=0.0, end_angle_deg=90.0)
+    arc = ArcSegment(
+        center_x=5.0, center_y=5.0, radius=2.0, start_angle_deg=0.0, end_angle_deg=90.0
+    )
     ctx.new_path()
     draw_arc_path(ctx, arc, clockwise=False)
 
 
 def test_arc_path_cw_no_crash() -> None:
     ctx, _ = _make_ctx()
-    arc = ArcSegment(center_x=5.0, center_y=5.0, radius=2.0, start_angle_deg=90.0, end_angle_deg=0.0)
+    arc = ArcSegment(
+        center_x=5.0, center_y=5.0, radius=2.0, start_angle_deg=90.0, end_angle_deg=0.0
+    )
     ctx.new_path()
     draw_arc_path(ctx, arc, clockwise=True)

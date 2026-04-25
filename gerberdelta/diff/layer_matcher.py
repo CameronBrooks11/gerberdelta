@@ -37,14 +37,21 @@ from pathlib import Path
 # Enums and types
 # ---------------------------------------------------------------------------
 
-_GERBER_SUFFIXES = frozenset({
-    ".gbr", ".ger",
-    ".gtl", ".gbl",  # top/bottom copper (legacy)
-    ".gts", ".gbs",  # top/bottom solder mask
-    ".gto", ".gbo",  # top/bottom silkscreen
-    ".gtp", ".gbp",  # top/bottom paste
-    ".gm1",          # mechanical/edge cuts (legacy)
-})
+_GERBER_SUFFIXES = frozenset(
+    {
+        ".gbr",
+        ".ger",
+        ".gtl",
+        ".gbl",  # top/bottom copper (legacy)
+        ".gts",
+        ".gbs",  # top/bottom solder mask
+        ".gto",
+        ".gbo",  # top/bottom silkscreen
+        ".gtp",
+        ".gbp",  # top/bottom paste
+        ".gm1",  # mechanical/edge cuts (legacy)
+    }
+)
 
 _EXCELLON_SUFFIXES = frozenset({".drl", ".exc", ".xln", ".ncd"})
 
@@ -72,11 +79,11 @@ class LayerType(StrEnum):
 class LayerPair:
     """A matched, added, or removed layer."""
 
-    name: str                   # display name = common stem (or bare filename)
-    before_path: Path | None    # None -> layer was added in after/
-    after_path: Path | None     # None -> layer was removed from before/
+    name: str  # display name = common stem (or bare filename)
+    before_path: Path | None  # None -> layer was added in after/
+    after_path: Path | None  # None -> layer was removed from before/
     layer_type: LayerType
-    status: str                 # "matched" | "added" | "removed"
+    status: str  # "matched" | "added" | "removed"
 
 
 # ---------------------------------------------------------------------------
@@ -111,13 +118,15 @@ def match_layers(before_dir: Path, after_dir: Path) -> list[LayerPair]:
         sample_path = b_path if b_path is not None else a_path
         ltype = _classify(stem, sample_path)  # type: ignore[arg-type]
 
-        pairs.append(LayerPair(
-            name=stem,
-            before_path=b_path,
-            after_path=a_path,
-            layer_type=ltype,
-            status=status,
-        ))
+        pairs.append(
+            LayerPair(
+                name=stem,
+                before_path=b_path,
+                after_path=a_path,
+                layer_type=ltype,
+                status=status,
+            )
+        )
 
     pairs.sort(key=lambda p: (_LAYER_TYPE_ORDER.get(p.layer_type, 99), p.name))
     return pairs

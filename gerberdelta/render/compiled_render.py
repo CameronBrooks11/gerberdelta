@@ -97,9 +97,7 @@ class BlockFlash:
     net: Net | None = None
 
 
-CompiledGroup = (
-    FlashBatch | StrokeBatch | RegionGroup | HoledFlash | MacroFlash | BlockFlash
-)
+CompiledGroup = FlashBatch | StrokeBatch | RegionGroup | HoledFlash | MacroFlash | BlockFlash
 
 
 # ---------------------------------------------------------------------------
@@ -217,7 +215,9 @@ def compile_render(parsed_image: ParsedImage) -> CompiledRender:
                 _flush_flash()
                 layer.groups.append(BlockFlash(aperture_code=net.aperture_index, net=net))
             elif (
-                isinstance(ap, (CircleAperture, RectangleAperture, ObroundAperture, PolygonAperture))
+                isinstance(
+                    ap, (CircleAperture, RectangleAperture, ObroundAperture, PolygonAperture)
+                )
                 and ap.hole_diameter is not None
             ):
                 _flush_flash()

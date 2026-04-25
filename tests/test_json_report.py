@@ -15,15 +15,19 @@ from gerberdelta.types import BoundingBox, DiffResult, LayerDiffResult, Region
 # ---------------------------------------------------------------------------
 
 
-def _bbox(min_x: float = 0.0, min_y: float = 0.0,
-          max_x: float = 1.0, max_y: float = 1.0) -> BoundingBox:
+def _bbox(
+    min_x: float = 0.0, min_y: float = 0.0, max_x: float = 1.0, max_y: float = 1.0
+) -> BoundingBox:
     return BoundingBox(min_x=min_x, min_y=min_y, max_x=max_x, max_y=max_y)
 
 
 def _region(rid: int = 1, px: int = 100) -> Region:
     return Region(
-        id=rid, centroid_x=0.5, centroid_y=0.5,
-        bounding_box=_bbox(), pixel_count=px,
+        id=rid,
+        centroid_x=0.5,
+        centroid_y=0.5,
+        bounding_box=_bbox(),
+        pixel_count=px,
     )
 
 
@@ -36,15 +40,20 @@ def _layer(
     layer_type: str = "FCu",
 ) -> LayerDiffResult:
     return LayerDiffResult(
-        name=name, status=status, layer_type=layer_type,
-        changed_pixel_count=changed, total_pixel_count=total,
+        name=name,
+        status=status,
+        layer_type=layer_type,
+        changed_pixel_count=changed,
+        total_pixel_count=total,
         regions=regions or [],
     )
 
 
 def _diff(*layers: LayerDiffResult, has_changes: bool | None = None) -> DiffResult:
     hc = any(lr.changed_pixel_count > 0 or lr.status != "matched" for lr in layers)
-    return DiffResult(layers=list(layers), has_changes=has_changes if has_changes is not None else hc)
+    return DiffResult(
+        layers=list(layers), has_changes=has_changes if has_changes is not None else hc
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -98,8 +107,11 @@ def test_build_report_added_layer() -> None:
 
 def test_build_report_region_fields() -> None:
     r = Region(
-        id=3, centroid_x=1.2, centroid_y=3.4,
-        bounding_box=_bbox(1.0, 3.0, 1.4, 3.8), pixel_count=42,
+        id=3,
+        centroid_x=1.2,
+        centroid_y=3.4,
+        bounding_box=_bbox(1.0, 3.0, 1.4, 3.8),
+        pixel_count=42,
     )
     dr = _diff(_layer(regions=[r]))
     region_out = build_report(dr)["layers"][0]["regions"][0]

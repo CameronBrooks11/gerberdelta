@@ -30,8 +30,12 @@ _FCU_AFTER = _FIXTURES_AFTER / "A64-OlinuXino-F.Cu.gbr"
 
 def _empty_image() -> ParsedImage:
     return ParsedImage(
-        nets=[], apertures={}, layers=[LayerState()],
-        net_states=[], bounding_box=BoundingBox(), diagnostics=[],
+        nets=[],
+        apertures={},
+        layers=[LayerState()],
+        net_states=[],
+        bounding_box=BoundingBox(),
+        diagnostics=[],
     )
 
 
@@ -41,7 +45,10 @@ def _bbox(min_x: float, min_y: float, max_x: float, max_y: float) -> BoundingBox
 
 def _region(
     rid: int,
-    min_x: float, min_y: float, max_x: float, max_y: float,
+    min_x: float,
+    min_y: float,
+    max_x: float,
+    max_y: float,
     px: int = 100,
 ) -> Region:
     cx = (min_x + max_x) / 2
@@ -101,10 +108,20 @@ def test_boxes_no_overlap_y_axis() -> None:
 
 
 def test_merge_region_pair_weighted_centroid() -> None:
-    a = Region(id=1, centroid_x=0.0, centroid_y=0.0,
-               bounding_box=_bbox(0.0, 0.0, 1.0, 1.0), pixel_count=100)
-    b = Region(id=2, centroid_x=2.0, centroid_y=2.0,
-               bounding_box=_bbox(1.5, 1.5, 2.5, 2.5), pixel_count=100)
+    a = Region(
+        id=1,
+        centroid_x=0.0,
+        centroid_y=0.0,
+        bounding_box=_bbox(0.0, 0.0, 1.0, 1.0),
+        pixel_count=100,
+    )
+    b = Region(
+        id=2,
+        centroid_x=2.0,
+        centroid_y=2.0,
+        bounding_box=_bbox(1.5, 1.5, 2.5, 2.5),
+        pixel_count=100,
+    )
     m = _merge_region_pair(a, b)
     assert m.centroid_x == pytest.approx(1.0)
     assert m.centroid_y == pytest.approx(1.0)
@@ -115,10 +132,20 @@ def test_merge_region_pair_weighted_centroid() -> None:
 
 
 def test_merge_region_pair_unequal_weights() -> None:
-    a = Region(id=1, centroid_x=0.0, centroid_y=0.0,
-               bounding_box=_bbox(0.0, 0.0, 0.1, 0.1), pixel_count=300)
-    b = Region(id=2, centroid_x=6.0, centroid_y=0.0,
-               bounding_box=_bbox(5.9, 0.0, 6.1, 0.1), pixel_count=100)
+    a = Region(
+        id=1,
+        centroid_x=0.0,
+        centroid_y=0.0,
+        bounding_box=_bbox(0.0, 0.0, 0.1, 0.1),
+        pixel_count=300,
+    )
+    b = Region(
+        id=2,
+        centroid_x=6.0,
+        centroid_y=0.0,
+        bounding_box=_bbox(5.9, 0.0, 6.1, 0.1),
+        pixel_count=100,
+    )
     m = _merge_region_pair(a, b)
     assert m.centroid_x == pytest.approx(1.5)  # (0*300 + 6*100) / 400
 
@@ -156,13 +183,13 @@ def test_merge_overlapping_regions_distant_no_merge() -> None:
 def test_merge_overlapping_regions_sort_order() -> None:
     """After merging, regions sorted by descending centroid_y, then asc centroid_x."""
     regions = [
-        _region(1, 0.0, 0.0, 0.1, 0.1),    # centroid_y ~= 0.05
-        _region(2, 0.0, 5.0, 0.1, 5.1),    # centroid_y ~= 5.05  (highest)
-        _region(3, 0.0, 2.0, 0.1, 2.1),    # centroid_y ~= 2.05
+        _region(1, 0.0, 0.0, 0.1, 0.1),  # centroid_y ~= 0.05
+        _region(2, 0.0, 5.0, 0.1, 5.1),  # centroid_y ~= 5.05  (highest)
+        _region(3, 0.0, 2.0, 0.1, 2.1),  # centroid_y ~= 2.05
     ]
     result = merge_overlapping_regions(regions, tolerance=0.0)
     assert len(result) == 3
-    assert result[0].id == 1   # was region 2 after sort (highest y)
+    assert result[0].id == 1  # was region 2 after sort (highest y)
     assert result[0].centroid_y == pytest.approx(5.05, abs=0.01)
     assert result[1].centroid_y == pytest.approx(2.05, abs=0.01)
     assert result[2].centroid_y == pytest.approx(0.05, abs=0.01)

@@ -51,8 +51,26 @@ _DEFAULT_FORMAT = FormatStatement(
 # macro definition, is treated as a macro body line.
 _COMMAND_PREFIXES: frozenset[str] = frozenset(
     [
-        "FS", "MO", "AD", "AM", "LP", "LM", "LR", "LS", "LN",
-        "SR", "AB", "TO", "TA", "TD", "TF", "IA", "AS", "MI", "OF", "SF",
+        "FS",
+        "MO",
+        "AD",
+        "AM",
+        "LP",
+        "LM",
+        "LR",
+        "LS",
+        "LN",
+        "SR",
+        "AB",
+        "TO",
+        "TA",
+        "TD",
+        "TF",
+        "IA",
+        "AS",
+        "MI",
+        "OF",
+        "SF",
     ]
 )
 
@@ -120,8 +138,15 @@ class _GerberParser:
         # Each entry: (d_code, block_ap, saved_nets, saved_layers,
         #              saved_apertures, saved_bbox, saved_layer_idx)
         self._block_stack: list[
-            tuple[int, BlockAperture, list[Net], list[LayerState],
-                  dict[int, Aperture], BoundingBox, int]
+            tuple[
+                int,
+                BlockAperture,
+                list[Net],
+                list[LayerState],
+                dict[int, Aperture],
+                BoundingBox,
+                int,
+            ]
         ] = []
 
     # ------------------------------------------------------------------
@@ -139,16 +164,22 @@ class _GerberParser:
 
     def _convert_x(self, raw_int: int, raw_str: str) -> float:
         return convert_coordinate(
-            raw_int, raw_str,
-            self._fmt.x_integer, self._fmt.x_decimal,
-            self._fmt.zero_omission, self._unit,
+            raw_int,
+            raw_str,
+            self._fmt.x_integer,
+            self._fmt.x_decimal,
+            self._fmt.zero_omission,
+            self._unit,
         )
 
     def _convert_y(self, raw_int: int, raw_str: str) -> float:
         return convert_coordinate(
-            raw_int, raw_str,
-            self._fmt.y_integer, self._fmt.y_decimal,
-            self._fmt.zero_omission, self._unit,
+            raw_int,
+            raw_str,
+            self._fmt.y_integer,
+            self._fmt.y_decimal,
+            self._fmt.zero_omission,
+            self._unit,
         )
 
     def _aperture_radius(self) -> float:
@@ -219,11 +250,23 @@ class _GerberParser:
             clockwise = self._interpolation == InterpolationMode.ClockwiseCircular
             if self._multi_quadrant:
                 arc_segment = compute_arc_multi_quadrant(
-                    self._prev_x, self._prev_y, stop_x, stop_y, arc_i, arc_j, clockwise,
+                    self._prev_x,
+                    self._prev_y,
+                    stop_x,
+                    stop_y,
+                    arc_i,
+                    arc_j,
+                    clockwise,
                 )
             else:
                 arc_segment = compute_arc_single_quadrant(
-                    self._prev_x, self._prev_y, stop_x, stop_y, arc_i, arc_j, clockwise,
+                    self._prev_x,
+                    self._prev_y,
+                    stop_x,
+                    stop_y,
+                    arc_i,
+                    arc_j,
+                    clockwise,
                 )
 
         net = Net(
@@ -263,26 +306,34 @@ class _GerberParser:
             self._interpolation = InterpolationMode.CounterClockwiseCircular
         elif value == 36:
             self._in_region_fill = True
-            self._nets.append(Net(
-                start_x=self._prev_x, start_y=self._prev_y,
-                stop_x=self._prev_x, stop_y=self._prev_y,
-                aperture_index=self._current_aperture,
-                aperture_state=ApertureState.Off,
-                interpolation=InterpolationMode.RegionStart,
-                layer_index=self._current_layer_idx,
-                net_state_index=self._current_net_state_idx,
-            ))
+            self._nets.append(
+                Net(
+                    start_x=self._prev_x,
+                    start_y=self._prev_y,
+                    stop_x=self._prev_x,
+                    stop_y=self._prev_y,
+                    aperture_index=self._current_aperture,
+                    aperture_state=ApertureState.Off,
+                    interpolation=InterpolationMode.RegionStart,
+                    layer_index=self._current_layer_idx,
+                    net_state_index=self._current_net_state_idx,
+                )
+            )
         elif value == 37:
             self._in_region_fill = False
-            self._nets.append(Net(
-                start_x=self._prev_x, start_y=self._prev_y,
-                stop_x=self._prev_x, stop_y=self._prev_y,
-                aperture_index=self._current_aperture,
-                aperture_state=ApertureState.Off,
-                interpolation=InterpolationMode.RegionEnd,
-                layer_index=self._current_layer_idx,
-                net_state_index=self._current_net_state_idx,
-            ))
+            self._nets.append(
+                Net(
+                    start_x=self._prev_x,
+                    start_y=self._prev_y,
+                    stop_x=self._prev_x,
+                    stop_y=self._prev_y,
+                    aperture_index=self._current_aperture,
+                    aperture_state=ApertureState.Off,
+                    interpolation=InterpolationMode.RegionEnd,
+                    layer_index=self._current_layer_idx,
+                    net_state_index=self._current_net_state_idx,
+                )
+            )
         elif value in (54, 55, 70, 71):
             # 54/55: deprecated aperture select/flash -- ignore
             # 70/71: deprecated inch/mm (should use MO instead) -- update unit
@@ -427,7 +478,7 @@ class _GerberParser:
             if rest.startswith("."):
                 comma = rest.find(",")
                 if comma > 0:
-                    self._net_attrs[rest[1:comma]] = rest[comma + 1:]
+                    self._net_attrs[rest[1:comma]] = rest[comma + 1 :]
 
         elif prefix == "TA":
             # Aperture attribute
@@ -435,7 +486,7 @@ class _GerberParser:
             if rest.startswith("."):
                 comma = rest.find(",")
                 if comma > 0:
-                    self._aperture_attrs[rest[1:comma]] = rest[comma + 1:]
+                    self._aperture_attrs[rest[1:comma]] = rest[comma + 1 :]
 
         elif prefix == "TD":
             # Delete attribute(s)
@@ -474,9 +525,7 @@ class _GerberParser:
                 self._warn(f"Invalid aperture block D-code: {body!r}", line)
                 return
             if d_code < 10:
-                self._warn(
-                    f"Invalid aperture block D-code: D{d_code} (must be >=10)", line
-                )
+                self._warn(f"Invalid aperture block D-code: D{d_code} (must be >=10)", line)
                 return
             if len(self._block_stack) >= 10:
                 self._warn("Aperture block nesting too deep (max 10)", line)
@@ -485,15 +534,17 @@ class _GerberParser:
             block_ap = BlockAperture()
 
             # Save parent state and redirect emission into the block.
-            self._block_stack.append((
-                d_code,
-                block_ap,
-                self._nets,
-                self._layers,
-                self._apertures,
-                self._bbox,
-                self._current_layer_idx,
-            ))
+            self._block_stack.append(
+                (
+                    d_code,
+                    block_ap,
+                    self._nets,
+                    self._layers,
+                    self._apertures,
+                    self._bbox,
+                    self._current_layer_idx,
+                )
+            )
 
             # Block gets a fresh single-layer state and an empty bbox.
             block_ap.layers.append(LayerState())
@@ -510,8 +561,12 @@ class _GerberParser:
                 self._warn("Unexpected AB close without matching open", line)
                 return
             (
-                d_code, block_ap,
-                saved_nets, saved_layers, saved_apertures, saved_bbox,
+                d_code,
+                block_ap,
+                saved_nets,
+                saved_layers,
+                saved_apertures,
+                saved_bbox,
                 saved_layer_idx,
             ) = self._block_stack.pop()
 
@@ -566,7 +621,10 @@ class _GerberParser:
             pos = j
 
         self._current_layer().step_and_repeat = StepAndRepeat(
-            x=x_count, y=y_count, dist_x=step_x, dist_y=step_y,
+            x=x_count,
+            y=y_count,
+            dist_x=step_x,
+            dist_y=step_y,
         )
 
     # ------------------------------------------------------------------

@@ -43,9 +43,9 @@ from gerberdelta.types import BoundingBox, ParsedImage, Region
 class SingleLayerDiff:
     """Full output of a single-layer pixel diff."""
 
-    arr_a: np.ndarray          # rendered image A, shape (H, W, 4) uint8
-    arr_b: np.ndarray          # rendered image B, shape (H, W, 4) uint8
-    xor: np.ndarray            # channel-wise XOR, shape (H, W, 4) uint8
+    arr_a: np.ndarray  # rendered image A, shape (H, W, 4) uint8
+    arr_b: np.ndarray  # rendered image B, shape (H, W, 4) uint8
+    xor: np.ndarray  # channel-wise XOR, shape (H, W, 4) uint8
     regions: list[Region]
     viewport: Viewport
     changed_pixel_count: int
@@ -231,13 +231,15 @@ def _ccl_and_extract(
 
         cx, cy = screen_to_world(centroid_rc[1], centroid_rc[0], vp)
 
-        regions.append(Region(
-            id=region_id,
-            centroid_x=cx,
-            centroid_y=cy,
-            bounding_box=bb,
-            pixel_count=count,
-        ))
+        regions.append(
+            Region(
+                id=region_id,
+                centroid_x=cx,
+                centroid_y=cy,
+                bounding_box=bb,
+                pixel_count=count,
+            )
+        )
         region_id += 1
 
     # Initial sort by descending pixel count (largest changes first, before merge).

@@ -16,9 +16,9 @@ class Viewport:
 
     width: int
     height: int
-    pan_x: float   # canvas X of the world origin
-    pan_y: float   # canvas Y of the world origin (after Y-flip)
-    zoom: float    # world units -> pixels
+    pan_x: float  # canvas X of the world origin
+    pan_y: float  # canvas Y of the world origin (after Y-flip)
+    zoom: float  # world units -> pixels
 
 
 def compute_viewport(bbox: BoundingBox, width: int, height: int) -> Viewport:
@@ -29,8 +29,10 @@ def compute_viewport(bbox: BoundingBox, width: int, height: int) -> Viewport:
     """
     if not bbox.is_valid:
         return Viewport(
-            width=width, height=height,
-            pan_x=width / 2.0, pan_y=height / 2.0,
+            width=width,
+            height=height,
+            pan_x=width / 2.0,
+            pan_y=height / 2.0,
             zoom=100.0,
         )
 
@@ -39,8 +41,10 @@ def compute_viewport(bbox: BoundingBox, width: int, height: int) -> Viewport:
 
     if bbox_w <= 0.0 or bbox_h <= 0.0:
         return Viewport(
-            width=width, height=height,
-            pan_x=width / 2.0, pan_y=height / 2.0,
+            width=width,
+            height=height,
+            pan_x=width / 2.0,
+            pan_y=height / 2.0,
             zoom=100.0,
         )
 

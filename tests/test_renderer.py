@@ -123,7 +123,10 @@ def test_compile_flash_batch_splits_on_aperture_change() -> None:
         _net(aperture_index=10, aperture_state=ApertureState.Flash, stop_x=0.1),
         _net(aperture_index=11, aperture_state=ApertureState.Flash, stop_x=0.2),
     ]
-    aps: dict[int, Aperture] = {10: CircleAperture(diameter=0.01), 11: CircleAperture(diameter=0.02)}
+    aps: dict[int, Aperture] = {
+        10: CircleAperture(diameter=0.01),
+        11: CircleAperture(diameter=0.02),
+    }
     cr = compile_render(_image_with_nets(nets, aps))
     groups = cr.layers[0].groups
     assert len(groups) == 2

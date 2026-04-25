@@ -59,7 +59,7 @@ class UnitType(StrEnum):
 
 
 class ZeroOmission(StrEnum):
-    Leading = "leading"   # leading zeros omitted (most common, RS-274X default)
+    Leading = "leading"  # leading zeros omitted (most common, RS-274X default)
     Trailing = "trailing"  # trailing zeros omitted
     Explicit = "explicit"  # all digits present (rare)
 
@@ -70,9 +70,9 @@ class CoordinateMode(StrEnum):
 
 
 class DiagnosticSeverity(StrEnum):
-    Error = "error"      # abort: parse result is unusable
+    Error = "error"  # abort: parse result is unusable
     Warning = "warning"  # proceed: result may be degraded
-    Info = "info"        # informational, suppressed unless -v
+    Info = "info"  # informational, suppressed unless -v
 
 
 # ---------------------------------------------------------------------------
@@ -125,8 +125,8 @@ class BoundingBox:
 
 @dataclass
 class StepAndRepeat:
-    x: int = 1          # repeat count X (>=1)
-    y: int = 1          # repeat count Y (>=1)
+    x: int = 1  # repeat count X (>=1)
+    y: int = 1  # repeat count Y (>=1)
     dist_x: float = 0.0  # step distance X in inches
     dist_y: float = 0.0  # step distance Y in inches
 
@@ -190,7 +190,7 @@ class Diagnostic:
 @dataclass
 class CircleAperture:
     aperture_type: Literal[ApertureType.Circle] = ApertureType.Circle
-    diameter: float = 0.0       # inches
+    diameter: float = 0.0  # inches
     hole_diameter: float | None = None
 
 
@@ -238,8 +238,12 @@ class BlockAperture:
 
 # Union type alias -- used for aperture dict values and type-narrowing dispatch.
 Aperture: TypeAlias = (
-    CircleAperture | RectangleAperture | ObroundAperture
-    | PolygonAperture | MacroAperture | BlockAperture
+    CircleAperture
+    | RectangleAperture
+    | ObroundAperture
+    | PolygonAperture
+    | MacroAperture
+    | BlockAperture
 )
 
 
@@ -280,8 +284,8 @@ class Region:
 @dataclass
 class LayerDiffResult:
     name: str
-    status: str           # "matched" | "added" | "removed"
-    layer_type: str       # LayerType.name from layer_matcher (e.g. "FCu", "Drill")
+    status: str  # "matched" | "added" | "removed"
+    layer_type: str  # LayerType.name from layer_matcher (e.g. "FCu", "Drill")
     changed_pixel_count: int
     total_pixel_count: int
     regions: list[Region]

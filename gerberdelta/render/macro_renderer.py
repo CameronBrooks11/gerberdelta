@@ -91,9 +91,7 @@ def compute_macro_bounding_radius(aperture: MacroAperture) -> float:
                     + p.width / 2.0
                 )
             case EvaluatedLineCenter():
-                r = math.hypot(p.center_x, p.center_y) + math.hypot(
-                    p.width / 2.0, p.height / 2.0
-                )
+                r = math.hypot(p.center_x, p.center_y) + math.hypot(p.width / 2.0, p.height / 2.0)
             case EvaluatedMoire():
                 r = math.hypot(p.center_x, p.center_y) + p.outer_diameter / 2.0
             case EvaluatedThermal():
@@ -101,10 +99,7 @@ def compute_macro_bounding_radius(aperture: MacroAperture) -> float:
             case EvaluatedOutline():
                 verts = p.vertices
                 if len(verts) >= 2:
-                    r = max(
-                        math.hypot(verts[i], verts[i + 1])
-                        for i in range(0, len(verts) - 1, 2)
-                    )
+                    r = max(math.hypot(verts[i], verts[i + 1]) for i in range(0, len(verts) - 1, 2))
         if r > max_r:
             max_r = r
 
@@ -128,9 +123,7 @@ def _apply_exposure(ctx: cairo.Context, exposure: float) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _draw_circle(
-    ctx: cairo.Context, x: float, y: float, p: EvaluatedCircle, scale: float
-) -> None:
+def _draw_circle(ctx: cairo.Context, x: float, y: float, p: EvaluatedCircle, scale: float) -> None:
     cx = x + p.center_x * scale
     cy = y + p.center_y * scale
     r = (p.diameter / 2.0) * scale
@@ -255,9 +248,7 @@ def _draw_polygon(
     ctx.restore()
 
 
-def _draw_moire(
-    ctx: cairo.Context, x: float, y: float, p: EvaluatedMoire, scale: float
-) -> None:
+def _draw_moire(ctx: cairo.Context, x: float, y: float, p: EvaluatedMoire, scale: float) -> None:
     """Concentric rings plus crosshair."""
     cx = x + p.center_x * scale
     cy = y + p.center_y * scale
