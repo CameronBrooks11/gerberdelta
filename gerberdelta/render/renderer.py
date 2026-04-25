@@ -18,6 +18,7 @@ punches holes into previously drawn content.
 from __future__ import annotations
 
 import math
+import weakref
 
 import cairocffi as cairo
 import numpy as np
@@ -52,6 +53,11 @@ from gerberdelta.types import (
 
 # Default draw colour: bright green (matches reference tool palette).
 _DEFAULT_COLOR: tuple[float, float, float, float] = (0.0, 1.0, 0.533, 1.0)
+
+# Cache of CompiledRender objects for BlockAperture instances.  Keyed by
+# id(block_ap).  A weakref finalizer removes each entry automatically when
+# its BlockAperture is garbage-collected, so stale ids cannot cause hits.
+_block_compile_cache: dict[int, object] = {}
 
 
 # ---------------------------------------------------------------------------
@@ -261,7 +267,14 @@ def _draw_block_flash(
 
     ctx.save()
     ctx.translate(x, y)
-    cr = compile_render(synthetic)
+    cache_key = id(block_ap)
+    cr = _block_compile_cache.get(cache_key)
+    if cr is None:
+        cr = compile_render(synthetic)
+        _block_compile_cache[cache_key] = cr
+        # Evict the entry automatically when block_ap is garbage-collected so
+        # a future object that reuses the same id cannot get a stale hit.
+        weakref.finalize(block_ap, _block_compile_cache.pop, cache_key, None)
     for layer in cr.layers:
         _render_layer(ctx, layer, block_ap.apertures, depth)
     ctx.restore()

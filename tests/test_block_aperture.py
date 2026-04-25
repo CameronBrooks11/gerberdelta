@@ -334,3 +334,73 @@ def test_step_and_repeat_renders_multiple_copies() -> None:
     lit_sr = int(np.sum(arr_sr[..., 3] > 0))
     # SR 2x2 should produce more lit pixels than a single instance
     assert lit_sr > lit_base * 2
+
+
+# ---------------------------------------------------------------------------
+# P6-1: BlockAperture CompiledRender cache
+# ---------------------------------------------------------------------------
+
+
+def test_block_aperture_compile_render_called_once(monkeypatch) -> None:
+    """compile_render must be called exactly once per unique BlockAperture."""
+    import gerberdelta.render.renderer as _rmod
+
+    call_count = 0
+    _original = _rmod.compile_render
+
+    def _counting(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        return _original(*args, **kwargs)
+
+    # Clear the cache so this test starts fresh.
+    _rmod._block_compile_cache.clear()
+    monkeypatch.setattr(_rmod, "compile_render", _counting)
+
+    src = _gerber(
+        "%ADD11C,0.05*%",
+        "%ABD10*%",
+        "D11*",
+        "X00000Y00000D03*",
+        "%AB*%",
+        # Flash the same block aperture (D10) three times.
+        "D10*X00000Y00000D03*",
+        "D10*X10000Y00000D03*",
+        "D10*X20000Y00000D03*",
+    )
+    img = parse_gerber(src)
+    vp = compute_viewport(img.bounding_box, 128, 128)
+    render_to_numpy(img, vp)
+
+    # compile_render is called once for the top-level ParsedImage, plus once
+    # for the BlockAperture (cached after that).  3 flashes → still only 1
+    # block compile call.  Total = 2.
+    assert call_count == 2, (
+        f"expected 2 compile_render calls total (1 top-level + 1 block), got {call_count}"
+    )
+
+
+def test_block_aperture_cache_correctness() -> None:
+    """Pixels produced with caching must equal pixels without caching."""
+    import gerberdelta.render.renderer as _rmod
+
+    src = _gerber(
+        "%ADD11C,0.05*%",
+        "%ABD10*%",
+        "D11*",
+        "X00000Y00000D03*",
+        "%AB*%",
+        "D10*X00000Y00000D03*",
+        "D10*X10000Y00000D03*",
+    )
+    img = parse_gerber(src)
+    vp = compute_viewport(img.bounding_box, 128, 128)
+
+    # First render (cold cache).
+    _rmod._block_compile_cache.clear()
+    arr1 = render_to_numpy(img, vp)
+
+    # Second render (warm cache).
+    arr2 = render_to_numpy(img, vp)
+
+    assert np.array_equal(arr1, arr2), "cached render differs from uncached render"
