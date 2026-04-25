@@ -42,8 +42,10 @@ from gerberdelta.render.macro_renderer import draw_macro_flash
 from gerberdelta.render.viewport import Viewport
 from gerberdelta.types import (
     Aperture,
+    BlockAperture,
     MacroAperture,
     MirrorState,
+    NetState,
     ParsedImage,
     Polarity,
 )
@@ -206,4 +208,46 @@ def _render_groups(
                         )
 
             case BlockFlash():
-                pass  # Phase 14: block aperture rendering
+                if group.net is not None:
+                    ap = apertures.get(group.aperture_code)
+                    if isinstance(ap, BlockAperture):
+                        _draw_block_flash(
+                            ctx,
+                            group.net.stop_x,
+                            group.net.stop_y,
+                            ap,
+                        )
+
+
+def _draw_block_flash(
+    ctx: cairo.Context,
+    x: float,
+    y: float,
+    block_ap: BlockAperture,
+) -> None:
+    """Render a block aperture flash by recursively compiling and drawing it.
+
+    The block's nets are in its own coordinate system.  Translating by
+    ``(x, y)`` stamps the block at the flash position.
+    """
+    if not block_ap.nets:
+        return
+
+    # Build a minimal synthetic ParsedImage so compile_render can be reused.
+    # Layer states come from the block's own captured layers (at least one).
+    layers = block_ap.layers if block_ap.layers else []
+    synthetic = ParsedImage(
+        nets=block_ap.nets,
+        apertures=block_ap.apertures,
+        layers=layers,
+        net_states=[NetState()],
+        bounding_box=block_ap.bounding_box,
+        diagnostics=[],
+    )
+
+    ctx.save()
+    ctx.translate(x, y)
+    cr = compile_render(synthetic)
+    for layer in cr.layers:
+        _render_layer(ctx, layer, block_ap.apertures)
+    ctx.restore()

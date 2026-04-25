@@ -232,6 +232,7 @@ class BlockAperture:
     aperture_type: Literal[ApertureType.Block] = ApertureType.Block
     nets: list[Net] = field(default_factory=list)
     apertures: dict[int, Aperture] = field(default_factory=dict)
+    layers: list[LayerState] = field(default_factory=list)
     bounding_box: BoundingBox = field(default_factory=BoundingBox)
 
 

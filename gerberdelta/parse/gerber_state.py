@@ -14,6 +14,7 @@ from gerberdelta.parse.tokenizer import TokenType, tokenize_gerber
 from gerberdelta.types import (
     Aperture,
     ApertureState,
+    BlockAperture,
     BoundingBox,
     CircleAperture,
     CoordinateMode,
@@ -114,6 +115,14 @@ class _GerberParser:
         # ---- object / aperture attributes ----
         self._net_attrs: dict[str, str] = {}
         self._aperture_attrs: dict[str, str] = {}
+
+        # ---- block aperture stack ----
+        # Each entry: (d_code, block_ap, saved_nets, saved_layers,
+        #              saved_apertures, saved_bbox, saved_layer_idx)
+        self._block_stack: list[
+            tuple[int, BlockAperture, list[Net], list[LayerState],
+                  dict[int, Aperture], BoundingBox, int]
+        ] = []
 
     # ------------------------------------------------------------------
     # Small helpers
@@ -410,7 +419,7 @@ class _GerberParser:
             self._handle_sr(body[2:], line)
 
         elif prefix == "AB":
-            pass  # Block aperture open/close — deferred to Phase 14
+            self._handle_ab(body[2:], line)
 
         elif prefix == "TO":
             # Object attribute: %TO.<name>,<value>*%
@@ -446,6 +455,79 @@ class _GerberParser:
 
         else:
             self._warn(f"Unknown extended command prefix {prefix!r}", line)
+
+    def _handle_ab(self, params: str, line: int) -> None:
+        """Open or close a block aperture definition.
+
+        ``%ABD<n>*%`` opens a block for D-code *n*; ``%AB*%`` closes it.
+        Nesting is supported up to depth 10 (matches the reference tool).
+        """
+        body = params.strip()
+        if body:
+            # Open: %ABD<n>*%
+            if not body.upper().startswith("D"):
+                self._warn(f"Invalid aperture block spec: {body!r}", line)
+                return
+            try:
+                d_code = int(body[1:])
+            except ValueError:
+                self._warn(f"Invalid aperture block D-code: {body!r}", line)
+                return
+            if d_code < 10:
+                self._warn(
+                    f"Invalid aperture block D-code: D{d_code} (must be ≥10)", line
+                )
+                return
+            if len(self._block_stack) >= 10:
+                self._warn("Aperture block nesting too deep (max 10)", line)
+                return
+
+            block_ap = BlockAperture()
+
+            # Save parent state and redirect emission into the block.
+            self._block_stack.append((
+                d_code,
+                block_ap,
+                self._nets,
+                self._layers,
+                self._apertures,
+                self._bbox,
+                self._current_layer_idx,
+            ))
+
+            # Block gets a fresh single-layer state and an empty bbox.
+            block_ap.layers.append(LayerState())
+            self._nets = block_ap.nets
+            self._layers = block_ap.layers
+            self._current_layer_idx = 0
+            # Copy parent apertures so the block can reference them.
+            self._apertures = dict(self._apertures)
+            self._bbox = BoundingBox()
+
+        else:
+            # Close: %AB*%
+            if not self._block_stack:
+                self._warn("Unexpected AB close without matching open", line)
+                return
+            (
+                d_code, block_ap,
+                saved_nets, saved_layers, saved_apertures, saved_bbox,
+                saved_layer_idx,
+            ) = self._block_stack.pop()
+
+            # Capture the block's accumulated state.
+            block_ap.apertures = self._apertures
+            block_ap.bounding_box = self._bbox
+
+            # Restore parent state.
+            self._nets = saved_nets
+            self._layers = saved_layers
+            self._apertures = saved_apertures
+            self._bbox = saved_bbox
+            self._current_layer_idx = saved_layer_idx
+
+            # Register the completed block aperture in the parent aperture dict.
+            self._apertures[d_code] = block_ap
 
     def _handle_sr(self, params: str, line: int) -> None:
         """Handle the SR body after stripping the 'SR' prefix."""
