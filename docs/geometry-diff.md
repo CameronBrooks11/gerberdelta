@@ -59,8 +59,8 @@ polygon. Required expansions:
 polygon construction, `buffer()` for Minkowski approximation, boolean operations, and
 area/centroid queries.
 
-Arc stroke expansion is the hardest case. Suggested tolerance: chord error <= 1 um
-(~ 64 segments per full circle at 0.5 mm diameter). Complex macros may need a
+Arc stroke expansion is the hardest case. Suggested tolerance: chord error $\leq 1\,\mu\text{m}$
+($\approx 64$ segments per full circle at $0.5\,\text{mm}$ diameter). Complex macros may need a
 bounding-box fallback to avoid performance problems on dense boards.
 
 ### Stage B -- Per-Layer Boolean Difference
@@ -82,7 +82,7 @@ Classify:
 - Same location, same aperture type, different dimensions -> **resized**
 - Same bounding-box centroid, different path -> **rerouted**
 
-Matching is heuristic. Suggested: centroid within `0.5 x min(aperture_diameter)` of the
+Matching is heuristic. Suggested: centroid within $0.5 \times \min(\text{aperture\_diameter})$ of the
 smaller shape. This needs user-tunable tolerance.
 
 ### Recommended Architecture
