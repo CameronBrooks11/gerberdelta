@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from gerberdelta.parse.macro_parser import (
+from gerberdiff.parse.macro_parser import (
     BinaryNode,
     EvaluatedCircle,
     EvaluatedLineVector,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from gerberdelta.parse.arc_math import arc_bounding_box, compute_arc_multi_quadrant, compute_arc_single_quadrant
+from gerberdiff.parse.arc_math import arc_bounding_box, compute_arc_multi_quadrant, compute_arc_single_quadrant
 
 
 def test_multi_quadrant_quarter_circle_ccw() -> None:

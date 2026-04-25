@@ -19,6 +19,6 @@
 
 - [ ] Tests added or updated
 - [ ] `uv run ruff check` passes
-- [ ] `uv run mypy gerberdelta/ tests/` passes
+- [ ] `uv run mypy gerberdiff/ tests/` passes
 - [ ] `CHANGELOG.md` `[Unreleased]` section updated
-- [ ] Version bumped in `pyproject.toml` **and** `gerberdelta/__init__.py` (if shipping a release)
+- [ ] Version bumped in `pyproject.toml` **and** `gerberdiff/__init__.py` (if shipping a release)

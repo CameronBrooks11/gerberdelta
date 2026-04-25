@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from gerberdelta.cli import cli
+from gerberdiff.cli import cli
 
 _FIXTURES = Path(__file__).parent / "fixtures" / "gerbers-before"
 

@@ -7,7 +7,7 @@ All coordinate values are in **inches**.
 | Field       | Type                 | Description                                                      |
 | ----------- | -------------------- | ---------------------------------------------------------------- |
 | `version`   | `integer`            | Schema version. Currently always `1`.                            |
-| `generator` | `string`             | Always `"gerberdelta"`.                                          |
+| `generator` | `string`             | Always `"gerberdiff"`.                                          |
 | `summary`   | `object`             | Aggregate counts across all layers (see below).                  |
 | `layers`    | `array[LayerResult]` | One entry per matched, added, or removed layer pair (see below). |
 
@@ -55,7 +55,7 @@ All coordinate values are in **inches**.
 ```json
 {
   "version": 1,
-  "generator": "gerberdelta",
+  "generator": "gerberdiff",
   "summary": {
     "changed_layers": 3,
     "total_regions": 12,

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "gerberdelta"
+name = "gerberdiff"
 version = "0.28.0"
 description = "Visual raster diff tool for Gerber/Excellon PCB design files"
 readme = "README.md"
@@ -32,10 +32,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/CameronBrooks11/gerberdelta"
-Repository = "https://github.com/CameronBrooks11/gerberdelta"
-Changelog = "https://github.com/CameronBrooks11/gerberdelta/blob/main/CHANGELOG.md"
-Issues = "https://github.com/CameronBrooks11/gerberdelta/issues"
+Homepage = "https://github.com/CameronBrooks11/gerberdiff"
+Repository = "https://github.com/CameronBrooks11/gerberdiff"
+Changelog = "https://github.com/CameronBrooks11/gerberdiff/blob/main/CHANGELOG.md"
+Issues = "https://github.com/CameronBrooks11/gerberdiff/issues"
 
 [project.optional-dependencies]
 # Installed by end users who want prettier terminal output
@@ -52,10 +52,10 @@ dev = [
 ]
 
 [project.scripts]
-gerberdelta = "gerberdelta.cli:cli"
+gerberdiff = "gerberdiff.cli:cli"
 
 [tool.hatch.build.targets.wheel]
-packages = ["gerberdelta"]
+packages = ["gerberdiff"]
 
 # -- pytest --------------------------------------------------------------------
 [tool.pytest.ini_options]
@@ -81,7 +81,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["gerberdelta"]
+known-first-party = ["gerberdiff"]
 
 # -- mypy ---------------------------------------------------------------------
 [tool.mypy]
@@ -99,8 +99,8 @@ ignore_missing_imports = true
 
 # -- coverage -----------------------------------------------------------------
 [tool.coverage.run]
-source = ["gerberdelta"]
-omit   = ["gerberdelta/cli.py"]   # CLI tested via integration; exclude from line-coverage gate
+source = ["gerberdiff"]
+omit   = ["gerberdiff/cli.py"]   # CLI tested via integration; exclude from line-coverage gate
 
 [tool.coverage.report]
 fail_under    = 85

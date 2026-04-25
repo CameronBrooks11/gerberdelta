@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from gerberdelta.parse.gerber_state import parse_gerber
-from gerberdelta.types import ApertureType, DiagnosticSeverity, Polarity
+from gerberdiff.parse.gerber_state import parse_gerber
+from gerberdiff.types import ApertureType, DiagnosticSeverity, Polarity
 
 _FIXTURES = Path(__file__).parent / "fixtures" / "gerbers-before"
 
@@ -58,7 +58,7 @@ def test_region_fill_markers_in_net_list() -> None:
     # G36/G37 should produce a single RegionFill object, not sentinel DrawOps
     content = "%FSLAX25Y25*%%MOIN*%%ADD10C,0.001*%G36*X10000Y10000D01*X20000D01*G37*M02*"
     img = parse_gerber(content)
-    from gerberdelta.types import DrawOp, RegionFill
+    from gerberdiff.types import DrawOp, RegionFill
 
     region_fills = [op for op in img.draw_ops if isinstance(op, RegionFill)]
     assert len(region_fills) == 1, "expected exactly one RegionFill in draw_ops"
@@ -104,9 +104,9 @@ def test_region_fill_renders_pixel() -> None:
         "G37*"
         "M02*"
     )
-    from gerberdelta.parse.gerber_state import parse_gerber as _pg
-    from gerberdelta.render.renderer import render_to_numpy
-    from gerberdelta.render.viewport import compute_viewport
+    from gerberdiff.parse.gerber_state import parse_gerber as _pg
+    from gerberdiff.render.renderer import render_to_numpy
+    from gerberdiff.render.viewport import compute_viewport
 
     img = _pg(content)
     vp = compute_viewport(img.bounding_box, width=64, height=64)
@@ -186,7 +186,7 @@ def test_block_aperture_does_not_leak_aperture_state() -> None:
         "M02*"
     )
     img = parse_gerber(gerber)
-    from gerberdelta.types import ApertureState, DrawOp
+    from gerberdiff.types import ApertureState, DrawOp
     flashes = [op for op in img.draw_ops if isinstance(op, DrawOp) and op.aperture_state == ApertureState.Flash]
     assert len(flashes) == 1
 
@@ -203,7 +203,7 @@ def test_block_aperture_does_not_leak_interpolation_mode() -> None:
         "M02*"
     )
     img = parse_gerber(gerber)
-    from gerberdelta.types import DrawOp, InterpolationMode
+    from gerberdiff.types import DrawOp, InterpolationMode
     linear_ops = [
         op for op in img.draw_ops
         if isinstance(op, DrawOp) and op.interpolation == InterpolationMode.Linear
@@ -242,7 +242,7 @@ def test_block_aperture_does_not_leak_unit_change() -> None:
         "M02*"
     )
     img = parse_gerber(gerber)
-    from gerberdelta.types import DrawOp
+    from gerberdiff.types import DrawOp
     ops = [op for op in img.draw_ops if isinstance(op, DrawOp)]
     assert ops, "expected at least one DrawOp"
     assert abs(ops[-1].stop_x - 1.0) < 1e-4, f"unit leaked: stop_x={ops[-1].stop_x}"
@@ -374,7 +374,7 @@ def test_incremental_mode_accumulates_coordinates() -> None:
         "M02*"
     )
     img = parse_gerber(gerber)
-    from gerberdelta.types import DrawOp
+    from gerberdiff.types import DrawOp
     ops = [op for op in img.draw_ops if isinstance(op, DrawOp)]
     assert len(ops) >= 2, f"expected at least 2 DrawOps, got {len(ops)}"
     # Second net must end further right than the first
@@ -398,7 +398,7 @@ def test_incremental_mode_returns_to_absolute_on_G90() -> None:
         "M02*"
     )
     img = parse_gerber(gerber)
-    from gerberdelta.types import DrawOp
+    from gerberdiff.types import DrawOp
     ops = [op for op in img.draw_ops if isinstance(op, DrawOp)]
     assert len(ops) >= 2
     # After G90, the second move is absolute: stop at exactly X=0.1 (same as first)

@@ -4,7 +4,7 @@ import math
 
 import cairocffi as cairo
 
-from gerberdelta.types import (
+from gerberdiff.types import (
     Aperture,
     ApertureState,
     ArcSegment,

@@ -3,16 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from gerberdelta.parse.arc_math import arc_bounding_box, compute_arc_multi_quadrant, compute_arc_single_quadrant
-from gerberdelta.parse.gerber_parser import (
+from gerberdiff.parse.arc_math import arc_bounding_box, compute_arc_multi_quadrant, compute_arc_single_quadrant
+from gerberdiff.parse.gerber_parser import (
     FormatStatement,
     convert_coordinate,
     parse_aperture_definition,
     parse_format_statement,
 )
-from gerberdelta.parse.macro_parser import MacroDef, parse_macro_body
-from gerberdelta.parse.tokenizer import TokenType, tokenize_gerber
-from gerberdelta.types import (
+from gerberdiff.parse.macro_parser import MacroDef, parse_macro_body
+from gerberdiff.parse.tokenizer import TokenType, tokenize_gerber
+from gerberdiff.types import (
     Aperture,
     ApertureState,
     BlockAperture,

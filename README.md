@@ -1,8 +1,8 @@
-# gerberdelta
+# gerberdiff
 
-[![CI](https://github.com/CameronBrooks11/gerberdelta/actions/workflows/ci.yml/badge.svg)](https://github.com/CameronBrooks11/gerberdelta/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/gerberdelta)](https://pypi.org/project/gerberdelta/)
-[![Python](https://img.shields.io/pypi/pyversions/gerberdelta)](https://pypi.org/project/gerberdelta/)
+[![CI](https://github.com/CameronBrooks11/gerberdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/CameronBrooks11/gerberdiff/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/gerberdiff)](https://pypi.org/project/gerberdiff/)
+[![Python](https://img.shields.io/pypi/pyversions/gerberdiff)](https://pypi.org/project/gerberdiff/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
 Visual raster diff tool for Gerber/Excellon PCB design files.
@@ -10,7 +10,7 @@ Visual raster diff tool for Gerber/Excellon PCB design files.
 ## Install
 
 ```sh
-pip install gerberdelta
+pip install gerberdiff
 ```
 
 Requires Python >= 3.11.
@@ -19,20 +19,20 @@ Requires Python >= 3.11.
 
 ```sh
 # Compare two board revisions
-gerberdelta diff before/ after/
+gerberdiff diff before/ after/
 
 # Write a JSON report and overlay PNGs
-gerberdelta diff before/ after/ --out-json report.json --out-png diffs/
+gerberdiff diff before/ after/ --out-json report.json --out-png diffs/
 
 # Exit 1 if any changes detected (useful in CI)
-gerberdelta diff before/ after/ --fail-on-diff
+gerberdiff diff before/ after/ --fail-on-diff
 ```
 
 ```python
-import gerberdelta
+import gerberdiff
 from pathlib import Path
 
-result = gerberdelta.compute_full_diff(Path("before/"), Path("after/"))
+result = gerberdiff.compute_full_diff(Path("before/"), Path("after/"))
 print(f"has_changes={result.has_changes}")
 ```
 

@@ -12,7 +12,7 @@
 **Do not open a public issue for security vulnerabilities.**
 
 Please report them via
-[GitHub private security advisories](https://github.com/CameronBrooks11/gerberdelta/security/advisories/new).
+[GitHub private security advisories](https://github.com/CameronBrooks11/gerberdiff/security/advisories/new).
 
 Include:
 
@@ -25,7 +25,7 @@ mitigation plan within **30 days** where feasible.
 
 ## Scope
 
-gerberdelta is a local CLI tool that reads Gerber/Excellon files from disk.  
+gerberdiff is a local CLI tool that reads Gerber/Excellon files from disk.  
 It does not start network servers, accept remote input, or persist credentials.  
 The most relevant attack surface is **malicious Gerber files** that could cause
 path traversal, resource exhaustion, or arbitrary code execution through crafted macros.

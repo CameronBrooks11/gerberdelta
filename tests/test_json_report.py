@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from gerberdelta.export.json_report import build_report, write_report
-from gerberdelta.types import (
+from gerberdiff.export.json_report import build_report, write_report
+from gerberdiff.types import (
     BoundingBox,
     DiffResult,
     LayerDiffResult,
@@ -72,7 +72,7 @@ def test_build_report_version() -> None:
 
 def test_build_report_generator() -> None:
     report = build_report(_diff())
-    assert report["generator"] == "gerberdelta"
+    assert report["generator"] == "gerberdiff"
 
 
 def test_build_report_summary_no_changes() -> None:

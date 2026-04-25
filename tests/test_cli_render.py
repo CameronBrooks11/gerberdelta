@@ -1,4 +1,4 @@
-"""Tests for the `gerberdelta render` CLI subcommand."""
+"""Tests for the `gerberdiff render` CLI subcommand."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner, Result
 
-from gerberdelta.cli import cli
+from gerberdiff.cli import cli
 
 _FIXTURES = Path(__file__).parent / "fixtures" / "gerbers-before"
 _FCU = _FIXTURES / "A64-OlinuXino-F.Cu.gbr"

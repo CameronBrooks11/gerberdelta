@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from gerberdelta.types import (
+from gerberdiff.types import (
     CircleAperture,
     CoordinateMode,
     MacroAperture,
@@ -15,7 +15,7 @@ from gerberdelta.types import (
 )
 
 if TYPE_CHECKING:
-    from gerberdelta.parse.macro_parser import MacroDef
+    from gerberdiff.parse.macro_parser import MacroDef
 
 
 @dataclass

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import cairocffi as cairo
 
-from gerberdelta.render.draw_ops import draw_arc_path, draw_flash, draw_net_as_stroke
-from gerberdelta.types import (
+from gerberdiff.render.draw_ops import draw_arc_path, draw_flash, draw_net_as_stroke
+from gerberdiff.types import (
     ApertureState,
     ArcSegment,
     CircleAperture,

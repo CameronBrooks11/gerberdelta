@@ -27,14 +27,14 @@ import numpy as np
 from scipy.ndimage import center_of_mass, find_objects
 from scipy.ndimage import label as ndimage_label
 
-from gerberdelta.render.renderer import render_to_numpy
-from gerberdelta.render.viewport import (
+from gerberdiff.render.renderer import render_to_numpy
+from gerberdiff.render.viewport import (
     Viewport,
     compute_viewport,
     merge_bounding_boxes,
     screen_to_world,
 )
-from gerberdelta.types import (
+from gerberdiff.types import (
     BoundingBox,
     Diagnostic,
     DiagnosticSeverity,
@@ -168,9 +168,9 @@ def compute_full_diff(
     """
     # Lazy imports: keep parse/ and diff/layer_matcher out of the module-load
     # critical path for callers that only use compute_diff.
-    from gerberdelta.diff.layer_matcher import EXCELLON_SUFFIXES, match_layers
-    from gerberdelta.parse.excellon_parser import parse_excellon
-    from gerberdelta.parse.gerber_state import parse_gerber
+    from gerberdiff.diff.layer_matcher import EXCELLON_SUFFIXES, match_layers
+    from gerberdiff.parse.excellon_parser import parse_excellon
+    from gerberdiff.parse.gerber_state import parse_gerber
 
     def _parse(path: Path) -> ParsedImage:
         content = path.read_text(errors="replace")

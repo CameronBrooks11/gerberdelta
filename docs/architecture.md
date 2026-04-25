@@ -2,7 +2,7 @@
 
 ## Overview
 
-gerberdelta is a visual raster diff tool for Gerber and Excellon PCB design files.
+gerberdiff is a visual raster diff tool for Gerber and Excellon PCB design files.
 It turns the question "what changed between two board revisions?" into visual overlays
 and machine-readable reports.
 
@@ -36,7 +36,7 @@ Gerber/Excellon files
 
 ## Module map
 
-### `gerberdelta/parse/`
+### `gerberdiff/parse/`
 
 | File                 | Purpose                                                                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -47,7 +47,7 @@ Gerber/Excellon files
 | `arc_math.py`        | Converts Gerber centre-offset arc representation to `ArcSegment` (centre + radius + start/end angles)                                       |
 | `excellon_parser.py` | Parses Excellon drill files (header + body) into a `ParsedImage` using the same IR                                                          |
 
-### `gerberdelta/render/`
+### `gerberdiff/render/`
 
 | File                 | Purpose                                                                                                     |
 | -------------------- | ----------------------------------------------------------------------------------------------------------- |
@@ -57,21 +57,21 @@ Gerber/Excellon files
 | `macro_renderer.py`  | Evaluates `MacroDef` primitives (circle, line, outline, polygon, thermal, moire, custom) to cairocffi paths |
 | `renderer.py`        | Orchestrates: creates `cairo.ImageSurface`, calls compiled render + draw-ops, returns numpy BGRA array      |
 
-### `gerberdelta/diff/`
+### `gerberdiff/diff/`
 
 | File               | Purpose                                                                                                    |
 | ------------------ | ---------------------------------------------------------------------------------------------------------- |
 | `diff_engine.py`   | Renders both images to a shared viewport, XORs RGB channels, runs scipy CCL, returns `SingleLayerDiff`     |
 | `layer_matcher.py` | Pairs files from two directories by stem; classifies each by `LayerType`; returns sorted `list[LayerPair]` |
 
-### `gerberdelta/export/`
+### `gerberdiff/export/`
 
 | File             | Purpose                                                                                          |
 | ---------------- | ------------------------------------------------------------------------------------------------ |
 | `json_report.py` | Builds a versioned JSON diff report from a `DiffResult`                                          |
 | `png_export.py`  | Builds a colour-coded overlay PNG: red = removed, green = added, yellow = changed, grey = common |
 
-### `gerberdelta/`
+### `gerberdiff/`
 
 | File       | Purpose                                                         |
 | ---------- | --------------------------------------------------------------- |
@@ -85,7 +85,7 @@ Gerber/Excellon files
 All coordinate values are in **inches** throughout the IR. The parse layer
 converts from whatever unit the file uses (inches or mm) before emitting nets.
 
-### Key types (`gerberdelta/types.py`)
+### Key types (`gerberdiff/types.py`)
 
 ```
 ParsedImage
@@ -176,8 +176,8 @@ shared viewport so both images are aligned before pixel comparison.
 the `Aperture` type alias, handle the new type in `gerber_state.py` (parsing) and
 `compiled_render.py` / `draw_ops.py` (rendering).
 
-**New exporter** -- add a module under `gerberdelta/export/`, accept a `DiffResult`
+**New exporter** -- add a module under `gerberdiff/export/`, accept a `DiffResult`
 and write output; wire it into the `diff` subcommand in `cli.py`.
 
-**New file format** -- add a parser module under `gerberdelta/parse/` that produces
+**New file format** -- add a parser module under `gerberdiff/parse/` that produces
 a `ParsedImage`; the entire render/diff pipeline works unchanged downstream.

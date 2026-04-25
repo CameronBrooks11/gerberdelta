@@ -5,7 +5,7 @@ import warnings
 
 import cairocffi as cairo
 
-from gerberdelta.parse.macro_parser import (
+from gerberdiff.parse.macro_parser import (
     EvaluatedCircle,
     EvaluatedLineCenter,
     EvaluatedLineVector,
@@ -15,7 +15,7 @@ from gerberdelta.parse.macro_parser import (
     EvaluatedThermal,
     evaluate_macro_primitives,
 )
-from gerberdelta.types import MacroAperture
+from gerberdiff.types import MacroAperture
 
 # ---------------------------------------------------------------------------
 # Public API

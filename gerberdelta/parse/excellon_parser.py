@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from gerberdelta.types import (
+from gerberdiff.types import (
     ApertureState,
     BoundingBox,
     CircleAperture,

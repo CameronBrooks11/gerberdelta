@@ -12,6 +12,6 @@ repos:
         name: mypy
         language: system
         entry: uv run mypy
-        args: [gerberdelta/, tests/]
+        args: [gerberdiff/, tests/]
         types: [python]
         pass_filenames: false

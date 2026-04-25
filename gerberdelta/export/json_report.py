@@ -13,10 +13,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from gerberdelta.types import DiffResult, LayerDiffResult, LayerStatus, Region
+from gerberdiff.types import DiffResult, LayerDiffResult, LayerStatus, Region
 
 _SCHEMA_VERSION = 1
-_GENERATOR = "gerberdelta"
+_GENERATOR = "gerberdiff"
 
 
 # ---------------------------------------------------------------------------

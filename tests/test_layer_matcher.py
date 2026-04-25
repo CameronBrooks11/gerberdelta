@@ -6,11 +6,11 @@ from pathlib import Path
 
 import pytest
 
-from gerberdelta.diff.layer_matcher import (
+from gerberdiff.diff.layer_matcher import (
     classify_layer,
     match_layers,
 )
-from gerberdelta.types import LayerStatus, LayerType
+from gerberdiff.types import LayerStatus, LayerType
 
 _FIXTURES_BEFORE = Path(__file__).parent / "fixtures" / "gerbers-before"
 _FIXTURES_AFTER = Path(__file__).parent / "fixtures" / "gerbers-after"

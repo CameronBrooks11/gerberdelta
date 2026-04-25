@@ -1,14 +1,14 @@
 # Contributing
 
-Thank you for your interest in contributing to **gerberdelta**!
+Thank you for your interest in contributing to **gerberdiff**!
 
 ## Development setup
 
 Requires Python >= 3.11 and [uv](https://docs.astral.sh/uv/).
 
 ```sh
-git clone https://github.com/CameronBrooks11/gerberdelta.git
-cd gerberdelta
+git clone https://github.com/CameronBrooks11/gerberdiff.git
+cd gerberdiff
 uv sync --dev
 ```
 
@@ -21,15 +21,15 @@ uv run pytest tests/ -q
 With coverage:
 
 ```sh
-uv run pytest tests/ --cov=gerberdelta --cov-report=term-missing
+uv run pytest tests/ --cov=gerberdiff --cov-report=term-missing
 ```
 
 ## Lint and type checking
 
 ```sh
-uv run ruff check gerberdelta/ tests/
-uv run ruff format gerberdelta/ tests/
-uv run mypy gerberdelta/ tests/
+uv run ruff check gerberdiff/ tests/
+uv run ruff format gerberdiff/ tests/
+uv run mypy gerberdiff/ tests/
 ```
 
 All three must pass with no errors before a PR will be merged. CI enforces this on every push.
@@ -48,7 +48,7 @@ All three must pass with no errors before a PR will be merged. CI enforces this 
 ## Versioning
 
 This project follows [Semantic Versioning](https://semver.org/).  
-The version is set in **both** `pyproject.toml` and `gerberdelta/__init__.py`; keep them in sync.
+The version is set in **both** `pyproject.toml` and `gerberdiff/__init__.py`; keep them in sync.
 
 ## Character usage
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from gerberdelta.types import BoundingBox
+from gerberdiff.types import BoundingBox
 
 
 @dataclass

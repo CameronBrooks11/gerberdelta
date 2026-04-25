@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from gerberdelta.types import ArcSegment, BoundingBox
+from gerberdiff.types import ArcSegment, BoundingBox
 
 _RAD_TO_DEG = 180.0 / math.pi
 

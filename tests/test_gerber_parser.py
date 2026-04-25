@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from gerberdelta.parse.gerber_parser import (
+from gerberdiff.parse.gerber_parser import (
     FormatStatement,
     convert_coordinate,
     parse_aperture_definition,
     parse_format_statement,
 )
-from gerberdelta.types import (
+from gerberdiff.types import (
     ApertureType,
     CircleAperture,
     CoordinateMode,

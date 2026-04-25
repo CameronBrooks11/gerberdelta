@@ -2,8 +2,8 @@
 
 Usage
 -----
->>> from gerberdelta.render.renderer import render_to_surface, render_to_numpy
->>> from gerberdelta.render.viewport import compute_viewport
+>>> from gerberdiff.render.renderer import render_to_surface, render_to_numpy
+>>> from gerberdiff.render.viewport import compute_viewport
 >>> vp = compute_viewport(parsed.bounding_box, width=1024, height=1024)
 >>> surface = render_to_surface(parsed, vp)
 >>> arr = render_to_numpy(parsed, vp)   # shape (H, W, 4) uint8 BGRA
@@ -23,7 +23,7 @@ import weakref
 import cairocffi as cairo
 import numpy as np
 
-from gerberdelta.render.compiled_render import (
+from gerberdiff.render.compiled_render import (
     BlockFlash,
     CompiledGroup,
     CompiledLayer,
@@ -34,14 +34,14 @@ from gerberdelta.render.compiled_render import (
     StrokeBatch,
     compile_render,
 )
-from gerberdelta.render.draw_ops import (
+from gerberdiff.render.draw_ops import (
     draw_flash,
     draw_net_as_stroke,
     draw_net_segment_in_region,
 )
-from gerberdelta.render.macro_renderer import draw_macro_flash
-from gerberdelta.render.viewport import Viewport
-from gerberdelta.types import (
+from gerberdiff.render.macro_renderer import draw_macro_flash
+from gerberdiff.render.viewport import Viewport
+from gerberdiff.types import (
     Aperture,
     BlockAperture,
     CoordState,

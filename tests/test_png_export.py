@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from gerberdelta.export.png_export import build_overlay_png
+from gerberdiff.export.png_export import build_overlay_png
 
 # ---------------------------------------------------------------------------
 # Helpers

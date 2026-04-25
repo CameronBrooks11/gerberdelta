@@ -56,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Public Python API** (`gerberdelta/__init__.py`) -- `parse_gerber`,
+- **Public Python API** (`gerberdiff/__init__.py`) -- `parse_gerber`,
   `parse_excellon`, `render_to_surface`, `render_to_numpy`, and `compute_diff`
   are now exported from the top-level package with an `__all__` list. Added a
   `## Python API` section to `README.md` with example usage.
@@ -216,7 +216,7 @@ saved_bbox, saved_layer_idx)` with a named `_BlockFrame` dataclass so that
 
 ### Added
 
-- **`diff` CLI subcommand** (`gerberdelta diff BEFORE_DIR AFTER_DIR`) with options:
+- **`diff` CLI subcommand** (`gerberdiff diff BEFORE_DIR AFTER_DIR`) with options:
   - `--layer NAME` (repeatable) -- restrict diff to named layers
   - `--width` / `--height` -- canvas dimensions (default 2048)
   - `--min-pixels` -- minimum pixel count for a reported region (default 4)
@@ -230,16 +230,16 @@ saved_bbox, saved_layer_idx)` with a named `_BlockFrame` dataclass so that
   - `--quiet` / `--verbose`
   - Exit codes: 0 = no diff (or diff without `--fail-on-diff`), 1 = diff found with
     `--fail-on-diff`, 2 = parse/IO error.
-- **`gerberdelta/export/json_report.py`** -- `build_report(diff_result) -> dict` and
+- **`gerberdiff/export/json_report.py`** -- `build_report(diff_result) -> dict` and
   `write_report(diff_result, path, overwrite)` producing a versioned JSON schema (version: 1)
   with summary (`changed_layers`, `total_regions`, `has_changes`) and per-layer region detail.
   Raises `FileExistsError` when the target exists and `overwrite=False`. Parent directories
   created automatically.
-- **`gerberdelta/export/png_export.py`** -- `build_overlay_png(arr_a, arr_b, xor, path, ...)`.
+- **`gerberdiff/export/png_export.py`** -- `build_overlay_png(arr_a, arr_b, xor, path, ...)`.
   Colour scheme (BGRA ARGB32): removed -> red `[0,0,255,255]`, added -> green `[0,255,0,255]`,
   changed (both non-zero, different value) -> yellow `[0,255,255,255]`, common (opt-in) -> grey
   `[128,128,128,255]`. Written via `cairocffi.ImageSurface.create_for_data`.
-- `DiffResult` and `LayerDiffResult` types added to `gerberdelta/types.py` (`has_changes` is a
+- `DiffResult` and `LayerDiffResult` types added to `gerberdiff/types.py` (`has_changes` is a
   stored field, not a property, so added/removed layers correctly drive `has_changes=True`
   regardless of pixel count).
 - 14 tests in `tests/test_json_report.py` and 8 tests in `tests/test_png_export.py`.
@@ -250,7 +250,7 @@ saved_bbox, saved_layer_idx)` with a named `_BlockFrame` dataclass so that
 
 ### Added
 
-- **`gerberdelta/diff/layer_matcher.py`** -- `match_layers(before_dir, after_dir) -> list[LayerPair]`
+- **`gerberdiff/diff/layer_matcher.py`** -- `match_layers(before_dir, after_dir) -> list[LayerPair]`
   pairs layers by file stem across two directories. Unmatched files are reported as
   `status="added"` or `status="removed"`. Results are sorted by a canonical
   `_LAYER_TYPE_ORDER` (FCu -> BCu -> inner Cu -> masks -> paste -> silk -> edge cuts -> drill ->
@@ -266,7 +266,7 @@ saved_bbox, saved_layer_idx)` with a named `_BlockFrame` dataclass so that
 
 ### Added
 
-- **`gerberdelta/diff/diff_engine.py`** -- pixel-based diff pipeline:
+- **`gerberdiff/diff/diff_engine.py`** -- pixel-based diff pipeline:
   1. Renders both images to a shared viewport (`merge_bounding_boxes` + `compute_viewport`).
   2. XORs RGB channels to produce a boolean change mask.
   3. `_ccl_and_extract()` -- `scipy.ndimage.label` (4-connectivity) -> `find_objects` ->
@@ -276,7 +276,7 @@ saved_bbox, saved_layer_idx)` with a named `_BlockFrame` dataclass so that
   `changed_pixel_count`, `total_pixel_count`.
 - `compute_diff(image_a, image_b, width, height, alignment_offset, min_pixel_count,
 merge_tolerance) -> SingleLayerDiff`.
-- `Region`, `LayerDiffResult`, `DiffResult` types added to `gerberdelta/types.py`.
+- `Region`, `LayerDiffResult`, `DiffResult` types added to `gerberdiff/types.py`.
 - `coordinate_offset: tuple[float, float] | None` parameter added to `render_to_surface()`
   and `render_to_numpy()` -- applied as `ctx.translate()` after viewport scale, enabling
   panel-offset alignment.
@@ -286,7 +286,7 @@ merge_tolerance) -> SingleLayerDiff`.
 
 ### Added
 
-- **`render` CLI subcommand** (`gerberdelta render FILE --out-png PATH`) with options:
+- **`render` CLI subcommand** (`gerberdiff render FILE --out-png PATH`) with options:
   `--width`, `--height`, `--overwrite`, `--quiet`, `--verbose`. Accepts both Gerber and
   Excellon files (auto-detected by suffix). Prints render timing under `--verbose`.
 - Memory warning for canvases exceeding 16 777 216 pixels (~64 MB) -- non-blocking advisory
@@ -303,7 +303,7 @@ merge_tolerance) -> SingleLayerDiff`.
 
 ### Added
 
-- **`gerberdelta/render/compiled_render.py`** -- single-pass compile stage that walks the flat
+- **`gerberdiff/render/compiled_render.py`** -- single-pass compile stage that walks the flat
   nets list and groups operations into typed batch objects:
   - `FlashBatch` -- simple flashes sharing one aperture (no hole, no macro/block)
   - `StrokeBatch` -- D01 strokes sharing one aperture
@@ -312,7 +312,7 @@ merge_tolerance) -> SingleLayerDiff`.
   - `MacroFlash` -- flash for a macro aperture (one per net)
   - `BlockFlash` -- flash for a block aperture (one per net; rendered in 0.14.0)
   - `CompiledLayer`, `CompiledRender` containers.
-- **`gerberdelta/render/renderer.py`** -- two-pass Cairo rasteriser:
+- **`gerberdiff/render/renderer.py`** -- two-pass Cairo rasteriser:
   - `render_to_surface(parsed_image, viewport, draw_color, coordinate_offset)
 -> cairo.ImageSurface`
   - `render_to_numpy(parsed_image, viewport, draw_color, coordinate_offset)
@@ -327,7 +327,7 @@ merge_tolerance) -> SingleLayerDiff`.
 
 ### Added
 
-- **`gerberdelta/render/macro_renderer.py`** -- all 7 RS-274X aperture macro primitive types:
+- **`gerberdiff/render/macro_renderer.py`** -- all 7 RS-274X aperture macro primitive types:
   - `1` -- Circle
   - `20` -- Vector line
   - `21` -- Center line
@@ -345,13 +345,13 @@ merge_tolerance) -> SingleLayerDiff`.
 
 ### Added
 
-- **`gerberdelta/render/viewport.py`**:
+- **`gerberdiff/render/viewport.py`**:
   - `Viewport` dataclass (`width`, `height`, `pan_x`, `pan_y`, `zoom`).
   - `compute_viewport(bbox, width, height) -> Viewport` -- fits the bounding box with a 10%
     margin, Y-flipped so Gerber's mathematical Y-up maps to screen Y-down.
   - `merge_bounding_boxes(a, b) -> BoundingBox` -- axis-aligned union of two boxes.
   - `screen_to_world(px, py, vp) -> tuple[float, float]` -- inverse viewport transform.
-- **`gerberdelta/render/draw_ops.py`**:
+- **`gerberdiff/render/draw_ops.py`**:
   - `draw_arc_path(ctx, arc_segment, start_x, start_y)` -- draws a Cairo arc path from a
     resolved `ArcSegment`.
   - `draw_net_segment_in_region(ctx, net)` -- adds a net's segment to an open region path.
@@ -365,11 +365,11 @@ merge_tolerance) -> SingleLayerDiff`.
 
 ### Added
 
-- **`gerberdelta/parse/excellon_parser.py`** -- Excellon NC drill format parser. Supports tool
+- **`gerberdiff/parse/excellon_parser.py`** -- Excellon NC drill format parser. Supports tool
   definitions (`T<n>C<dia>`), drill hits (D03 / no D-code with coordinates), routed slots
   (G00 move + G01 linear route), metric/imperial unit modes, and leading/trailing zero
   suppression. Emits `ParsedImage` with the same IR as the Gerber parser.
-- **`parse` CLI subcommand** (`gerberdelta parse FILE`) with options: `--dump-ir` (JSON
+- **`parse` CLI subcommand** (`gerberdiff parse FILE`) with options: `--dump-ir` (JSON
   summary to stdout), `--quiet`, `--verbose`. Auto-detects Gerber vs. Excellon by file suffix.
   Exit code 2 on parse errors.
 - 8 tests in `tests/test_excellon_parser.py` and 6 tests in `tests/test_cli_parse.py`.
@@ -378,7 +378,7 @@ merge_tolerance) -> SingleLayerDiff`.
 
 ### Added
 
-- **`gerberdelta/parse/gerber_state.py`** -- full RS-274X stateful parser:
+- **`gerberdiff/parse/gerber_state.py`** -- full RS-274X stateful parser:
   - Format statement (`%FS...%`) and unit mode (`%MO...%`)
   - All aperture definitions via `parse_aperture_definition` (phases 3-4)
   - Macro definitions (`%AM...%`) collected and parsed via `parse_macro_body`
@@ -398,10 +398,10 @@ merge_tolerance) -> SingleLayerDiff`.
 
 ### Added
 
-- **`gerberdelta/parse/arc_math.py`** -- geometry helpers for both arc modes:
+- **`gerberdiff/parse/arc_math.py`** -- geometry helpers for both arc modes:
   - `compute_arc_single_quadrant(sx, sy, ex, ey, i, j, clockwise) -> ArcSegment | None`
   - `compute_arc_multi_quadrant(sx, sy, ex, ey, i, j, clockwise) -> ArcSegment | None`
-- **`gerberdelta/parse/macro_parser.py`** -- RS-274X aperture macro parser and evaluator:
+- **`gerberdiff/parse/macro_parser.py`** -- RS-274X aperture macro parser and evaluator:
   - Expression AST with literal, variable (`$n`), binary operators, and unary minus nodes.
   - `parse_macro_body(name, body) -> MacroDef`
   - All 7 primitive types parsed into `MacroPrimitive` dataclasses.
@@ -413,12 +413,12 @@ merge_tolerance) -> SingleLayerDiff`.
 
 ### Added
 
-- **`gerberdelta/parse/tokenizer.py`** -- RS-274X tokenizer:
+- **`gerberdiff/parse/tokenizer.py`** -- RS-274X tokenizer:
   - `TokenType` StrEnum: `GCode`, `DCode`, `Coordinate`, `EndOfBlock`, `Extended`, `EndOfFile`,
     `Unknown`.
   - `Token` dataclass: `type`, `raw`, `numeric_value`, `line`.
   - `tokenize_gerber(content) -> Iterator[Token]`
-- **`gerberdelta/parse/gerber_parser.py`** -- stateless gerber parser utilities:
+- **`gerberdiff/parse/gerber_parser.py`** -- stateless gerber parser utilities:
   - `FormatStatement` dataclass.
   - `parse_format_statement(body) -> FormatStatement | None`
   - `parse_aperture_definition(body, unit, macro_map) -> tuple[int, Aperture] | None` --
@@ -432,7 +432,7 @@ merge_tolerance) -> SingleLayerDiff`.
 
 ### Added
 
-- **`gerberdelta/types.py`** -- complete intermediate representation (IR) type system:
+- **`gerberdiff/types.py`** -- complete intermediate representation (IR) type system:
   - Enums (all `StrEnum`): `ApertureType`, `ApertureState`, `InterpolationMode`, `Polarity`,
     `MirrorState`, `UnitType`, `ZeroOmission`, `CoordinateMode`, `DiagnosticSeverity`.
   - Geometric primitives: `ArcSegment`, `BoundingBox` (with `expand()` and `is_valid`).
@@ -447,30 +447,30 @@ merge_tolerance) -> SingleLayerDiff`.
 
 ### Added
 
-- Package scaffold: `pyproject.toml` (hatchling build), `uv.lock`, `gerberdelta/__init__.py`
+- Package scaffold: `pyproject.toml` (hatchling build), `uv.lock`, `gerberdiff/__init__.py`
   with `__version__ = "0.1.0"`.
-- CLI entry point `gerberdelta = "gerberdelta.cli:cli"` (stub group with version option).
+- CLI entry point `gerberdiff = "gerberdiff.cli:cli"` (stub group with version option).
 - Subpackage directories with `__init__.py`: `parse/`, `render/`, `diff/`, `export/`.
 - Core runtime dependencies: `click>=8`, `numpy>=1.24`, `cairocffi>=1.6`.
-- Optional extra `gerberdelta[rich]` for `rich>=13`.
+- Optional extra `gerberdiff[rich]` for `rich>=13`.
 - Dev toolchain in `[dependency-groups].dev`: `pytest>=8`, `pytest-cov>=5`, `ruff>=0.4`,
   `mypy>=1.10`.
-- Ruff rules: E, F, I, UP, B, C4, RUF; ignores E501. `known-first-party = ["gerberdelta"]`.
+- Ruff rules: E, F, I, UP, B, C4, RUF; ignores E501. `known-first-party = ["gerberdiff"]`.
 - mypy `strict=true`, `warn_unused_ignores=true`, `cairocffi.*` override for missing stubs.
 - 2 smoke tests in `tests/test_scaffold.py`.
 
-[Unreleased]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.14.0...HEAD
-[0.14.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.13.0...v0.14.0
-[0.13.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.12.0...v0.13.0
-[0.12.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.11.0...v0.12.0
-[0.11.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.10.0...v0.11.0
-[0.10.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.9.0...v0.10.0
-[0.9.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.8.0...v0.9.0
-[0.8.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.7.0...v0.8.0
-[0.7.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.6.0...v0.7.0
-[0.6.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.5.0...v0.6.0
-[0.5.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/CameronBrooks11/gerberdelta/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/CameronBrooks11/gerberdelta/releases/tag/v0.1.0
+[Unreleased]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.13.0...v0.14.0
+[0.13.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.12.0...v0.13.0
+[0.12.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.10.0...v0.11.0
+[0.10.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.9.0...v0.10.0
+[0.9.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.8.0...v0.9.0
+[0.8.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.6.0...v0.7.0
+[0.6.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/CameronBrooks11/gerberdiff/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/CameronBrooks11/gerberdiff/releases/tag/v0.1.0

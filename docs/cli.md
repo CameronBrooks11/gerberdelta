@@ -3,28 +3,28 @@
 ## `parse` -- inspect a single file
 
 ```sh
-gerberdelta parse board.gbr
-gerberdelta parse board.gbr --dump-ir    # JSON summary to stdout
-gerberdelta parse board.gbr --verbose    # include info-level diagnostics
+gerberdiff parse board.gbr
+gerberdiff parse board.gbr --dump-ir    # JSON summary to stdout
+gerberdiff parse board.gbr --verbose    # include info-level diagnostics
 ```
 
 ## `render` -- rasterise a single file to PNG
 
 ```sh
-gerberdelta render board.gbr --out-png board.png
-gerberdelta render board.gbr --out-png board.png --width 4096 --height 4096
-gerberdelta render board.gbr --out-png board.png --overwrite
+gerberdiff render board.gbr --out-png board.png
+gerberdiff render board.gbr --out-png board.png --width 4096 --height 4096
+gerberdiff render board.gbr --out-png board.png --overwrite
 ```
 
 ## `diff` -- compare two layer directories
 
 ```sh
-gerberdelta diff before/ after/
-gerberdelta diff before/ after/ --fail-on-diff          # exit 1 if changes found
-gerberdelta diff before/ after/ --out-json report.json
-gerberdelta diff before/ after/ --out-png diff_pngs/
-gerberdelta diff before/ after/ --layer F.Cu --verbose
-gerberdelta diff before/ after/ --align-offset 0.5,0    # shift board B by 0.5 in
+gerberdiff diff before/ after/
+gerberdiff diff before/ after/ --fail-on-diff          # exit 1 if changes found
+gerberdiff diff before/ after/ --out-json report.json
+gerberdiff diff before/ after/ --out-png diff_pngs/
+gerberdiff diff before/ after/ --layer F.Cu --verbose
+gerberdiff diff before/ after/ --align-offset 0.5,0    # shift board B by 0.5 in
 ```
 
 ### Options

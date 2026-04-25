@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from gerberdelta.types import (
+from gerberdiff.types import (
     ApertureState,
     ApertureType,
     BoundingBox,

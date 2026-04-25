@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Literal, TypeAlias
 if TYPE_CHECKING:
     # MacroDef lives in parse/macro_parser.py (Phase 4).  Imported only for
     # type-checking to avoid a runtime circular dependency.
-    from gerberdelta.parse.macro_parser import MacroDef
+    from gerberdiff.parse.macro_parser import MacroDef
 
 
 # ---------------------------------------------------------------------------

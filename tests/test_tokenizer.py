@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from gerberdelta.parse.tokenizer import Token, TokenType, tokenize_gerber
+from gerberdiff.parse.tokenizer import Token, TokenType, tokenize_gerber
 
 
 def tokens(s: str) -> list[Token]:

@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-from gerberdelta.types import (
+from gerberdiff.types import (
     ApertureState,
     BlockAperture,
     CircleAperture,

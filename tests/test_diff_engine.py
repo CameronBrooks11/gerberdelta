@@ -7,15 +7,15 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from gerberdelta.diff.diff_engine import (
+from gerberdiff.diff.diff_engine import (
     SingleLayerDiff,
     _merge_region_pair,
     boxes_overlap,
     compute_diff,
     merge_overlapping_regions,
 )
-from gerberdelta.parse.gerber_state import parse_gerber
-from gerberdelta.types import BoundingBox, LayerState, ParsedImage, Region
+from gerberdiff.parse.gerber_state import parse_gerber
+from gerberdiff.types import BoundingBox, LayerState, ParsedImage, Region
 
 _FIXTURES_BEFORE = Path(__file__).parent / "fixtures" / "gerbers-before"
 _FIXTURES_AFTER = Path(__file__).parent / "fixtures" / "gerbers-after"
@@ -300,13 +300,13 @@ def test_merge_cascade_three_regions() -> None:
 def _dot_image(x: float = 0.0, y: float = 0.0) -> ParsedImage:
     """ParsedImage with a single circle flash at (x, y)."""
     ap_code = 10
-    from gerberdelta.types import ApertureState, DrawOp, InterpolationMode
+    from gerberdiff.types import ApertureState, DrawOp, InterpolationMode
     net = DrawOp(
         start_x=x, start_y=y, stop_x=x, stop_y=y,
         aperture_index=ap_code, aperture_state=ApertureState.Flash,
         interpolation=InterpolationMode.Linear, layer_index=0, net_state_index=0,
     )
-    from gerberdelta.types import CircleAperture
+    from gerberdiff.types import CircleAperture
     bb = BoundingBox()
     bb.expand(x, y, 0.02)
     return ParsedImage(

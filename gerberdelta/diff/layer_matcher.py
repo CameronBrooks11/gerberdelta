@@ -33,7 +33,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from gerberdelta.types import LayerStatus, LayerType
+from gerberdiff.types import LayerStatus, LayerType
 
 _GERBER_SUFFIXES = frozenset(
     {

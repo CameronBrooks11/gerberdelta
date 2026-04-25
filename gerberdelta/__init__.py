@@ -1,12 +1,12 @@
 __version__ = "0.28.0"
 
-from gerberdelta.diff.diff_engine import SingleLayerDiff, compute_diff, compute_full_diff
-from gerberdelta.diff.layer_matcher import LayerPair, match_layers
-from gerberdelta.parse.excellon_parser import parse_excellon
-from gerberdelta.parse.gerber_state import parse_gerber
-from gerberdelta.render.renderer import render_to_numpy, render_to_surface
-from gerberdelta.render.viewport import Viewport, compute_viewport
-from gerberdelta.types import (
+from gerberdiff.diff.diff_engine import SingleLayerDiff, compute_diff, compute_full_diff
+from gerberdiff.diff.layer_matcher import LayerPair, match_layers
+from gerberdiff.parse.excellon_parser import parse_excellon
+from gerberdiff.parse.gerber_state import parse_gerber
+from gerberdiff.render.renderer import render_to_numpy, render_to_surface
+from gerberdiff.render.viewport import Viewport, compute_viewport
+from gerberdiff.types import (
     BoundingBox,
     Diagnostic,
     DiagnosticSeverity,

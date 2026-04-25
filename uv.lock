@@ -214,7 +214,7 @@ toml = [
 ]
 
 [[package]]
-name = "gerberdelta"
+name = "gerberdiff"
 version = "0.28.0"
 source = { editable = "." }
 dependencies = [

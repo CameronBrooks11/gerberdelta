@@ -19,11 +19,11 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --dev
-      - run: uv run ruff check gerberdelta/ tests/
-      - run: uv run ruff format --check gerberdelta/ tests/
+      - run: uv run ruff check gerberdiff/ tests/
+      - run: uv run ruff format --check gerberdiff/ tests/
       - name: Check for non-ASCII characters
         run: |
-          if grep -rP '[^\x00-\x7F]' gerberdelta/ tests/ *.md *.toml; then
+          if grep -rP '[^\x00-\x7F]' gerberdiff/ tests/ *.md *.toml; then
             echo "Non-ASCII characters found"
             exit 1
           fi
@@ -37,7 +37,7 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --dev
-      - run: uv run mypy gerberdelta/ tests/
+      - run: uv run mypy gerberdiff/ tests/
 
   test:
     name: Test (Python ${{ matrix.python-version }}, ${{ matrix.os }})
@@ -57,7 +57,7 @@ jobs:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
       - run: uv sync --dev
-      - run: uv run pytest tests/ --cov=gerberdelta --cov-report=xml --cov-fail-under=90 -q
+      - run: uv run pytest tests/ --cov=gerberdiff --cov-report=xml --cov-fail-under=90 -q
       - uses: actions/upload-artifact@v7
         if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
         with:

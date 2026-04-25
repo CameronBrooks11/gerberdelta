@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from gerberdelta.render.viewport import (
+from gerberdiff.render.viewport import (
     compute_viewport,
     merge_bounding_boxes,
     screen_to_world,
 )
-from gerberdelta.types import BoundingBox
+from gerberdiff.types import BoundingBox
 
 
 def _bbox(*points: tuple[float, float]) -> BoundingBox:

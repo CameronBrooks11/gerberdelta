@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from gerberdelta.parse.excellon_parser import _apply_format, _FormatSpec, parse_excellon
-from gerberdelta.types import ApertureState, ApertureType, DiagnosticSeverity, DrawOp, RegionFill, UnitType
+from gerberdiff.parse.excellon_parser import _apply_format, _FormatSpec, parse_excellon
+from gerberdiff.types import ApertureState, ApertureType, DiagnosticSeverity, DrawOp, RegionFill, UnitType
 
 _FIXTURES = Path(__file__).parent / "fixtures" / "gerbers-before"
 _FIXTURES_ROOT = Path(__file__).parent / "fixtures"

@@ -7,15 +7,15 @@ from pathlib import Path
 
 import click
 
-from gerberdelta import __version__
-from gerberdelta.diff.layer_matcher import EXCELLON_SUFFIXES
-from gerberdelta.types import Diagnostic, DiagnosticSeverity, LayerStatus
+from gerberdiff import __version__
+from gerberdiff.diff.layer_matcher import EXCELLON_SUFFIXES
+from gerberdiff.types import Diagnostic, DiagnosticSeverity, LayerStatus
 
 _MEMORY_WARN_PIXELS = 16_777_216  # 4096^2
 
 
 @click.group()
-@click.version_option(__version__, prog_name="gerberdelta")
+@click.version_option(__version__, prog_name="gerberdiff")
 def cli() -> None:
     """Visual raster diff tool for Gerber/Excellon PCB design files."""
 
@@ -27,8 +27,8 @@ def cli() -> None:
 @click.option("-v", "--verbose", is_flag=True, help="Print Info-level diagnostics.")
 def parse_cmd(file: Path, dump_ir: bool, quiet: bool, verbose: bool) -> None:
     """Parse a Gerber or Excellon file and report diagnostics."""
-    from gerberdelta.parse.excellon_parser import parse_excellon
-    from gerberdelta.parse.gerber_state import parse_gerber
+    from gerberdiff.parse.excellon_parser import parse_excellon
+    from gerberdiff.parse.gerber_state import parse_gerber
 
     try:
         content = file.read_text(errors="replace")
@@ -110,10 +110,10 @@ def render_cmd(
     verbose: bool,
 ) -> None:
     """Render a Gerber or Excellon file to a PNG image."""
-    from gerberdelta.parse.excellon_parser import parse_excellon
-    from gerberdelta.parse.gerber_state import parse_gerber
-    from gerberdelta.render.renderer import render_to_surface
-    from gerberdelta.render.viewport import compute_viewport
+    from gerberdiff.parse.excellon_parser import parse_excellon
+    from gerberdiff.parse.gerber_state import parse_gerber
+    from gerberdiff.render.renderer import render_to_surface
+    from gerberdiff.render.viewport import compute_viewport
 
     # Memory warning -- non-blocking.
     total_pixels = width * height
@@ -249,10 +249,10 @@ def diff_cmd(
     verbose: bool,
 ) -> None:
     """Compare two directories of Gerber/Excellon layer files."""
-    from gerberdelta.diff.diff_engine import compute_full_diff
-    from gerberdelta.export.json_report import write_report
-    from gerberdelta.export.png_export import build_overlay_png
-    from gerberdelta.types import GerberParseError
+    from gerberdiff.diff.diff_engine import compute_full_diff
+    from gerberdiff.export.json_report import write_report
+    from gerberdiff.export.png_export import build_overlay_png
+    from gerberdiff.types import GerberParseError
 
     # Parse --align-offset
     try:

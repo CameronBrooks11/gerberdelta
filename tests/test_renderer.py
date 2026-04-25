@@ -7,8 +7,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from gerberdelta.parse.gerber_state import parse_gerber
-from gerberdelta.render.compiled_render import (
+from gerberdiff.parse.gerber_state import parse_gerber
+from gerberdiff.render.compiled_render import (
     CompiledRender,
     FlashBatch,
     HoledFlash,
@@ -17,9 +17,9 @@ from gerberdelta.render.compiled_render import (
     StrokeBatch,
     compile_render,
 )
-from gerberdelta.render.renderer import render_to_numpy, render_to_surface
-from gerberdelta.render.viewport import Viewport, compute_viewport
-from gerberdelta.types import (
+from gerberdiff.render.renderer import render_to_numpy, render_to_surface
+from gerberdiff.render.viewport import Viewport, compute_viewport
+from gerberdiff.types import (
     Aperture,
     ApertureState,
     BlockAperture,

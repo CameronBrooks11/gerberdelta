@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from gerberdelta.parse.gerber_state import parse_gerber
-from gerberdelta.render.compiled_render import BlockFlash, compile_render
-from gerberdelta.render.renderer import render_to_numpy, render_to_surface
-from gerberdelta.render.viewport import compute_viewport
-from gerberdelta.types import (
+from gerberdiff.parse.gerber_state import parse_gerber
+from gerberdiff.render.compiled_render import BlockFlash, compile_render
+from gerberdiff.render.renderer import render_to_numpy, render_to_surface
+from gerberdiff.render.viewport import compute_viewport
+from gerberdiff.types import (
     ApertureState,
     BlockAperture,
     BoundingBox,
@@ -70,7 +70,7 @@ def test_block_aperture_nets_captured() -> None:
     assert isinstance(block, BlockAperture)
     assert len(block.draw_ops) == 2
     # Flash nets
-    from gerberdelta.types import DrawOp
+    from gerberdiff.types import DrawOp
     assert all(isinstance(n, DrawOp) and n.aperture_state == ApertureState.Flash for n in block.draw_ops)
 
 
@@ -278,7 +278,7 @@ def test_negative_coordinate_render_non_empty() -> None:
         aperture_index=10,
         aperture_state=ApertureState.Flash,
         interpolation=__import__(
-            "gerberdelta.types", fromlist=["InterpolationMode"]
+            "gerberdiff.types", fromlist=["InterpolationMode"]
         ).InterpolationMode.Linear,
         layer_index=0,
         net_state_index=0,
@@ -343,7 +343,7 @@ def test_step_and_repeat_renders_multiple_copies() -> None:
 
 def test_block_aperture_compile_render_called_once(monkeypatch) -> None:
     """compile_render must be called exactly once per unique BlockAperture."""
-    import gerberdelta.render.renderer as _rmod
+    import gerberdiff.render.renderer as _rmod
 
     call_count = 0
     _original = _rmod.compile_render
@@ -382,7 +382,7 @@ def test_block_aperture_compile_render_called_once(monkeypatch) -> None:
 
 def test_block_aperture_cache_correctness() -> None:
     """Pixels produced with caching must equal pixels without caching."""
-    import gerberdelta.render.renderer as _rmod
+    import gerberdiff.render.renderer as _rmod
 
     src = _gerber(
         "%ADD11C,0.05*%",

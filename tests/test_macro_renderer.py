@@ -3,9 +3,9 @@ from __future__ import annotations
 import cairocffi as cairo
 import numpy as np
 
-from gerberdelta.parse.macro_parser import parse_macro_body
-from gerberdelta.render.macro_renderer import compute_macro_bounding_radius, draw_macro_flash
-from gerberdelta.types import MacroAperture
+from gerberdiff.parse.macro_parser import parse_macro_body
+from gerberdiff.render.macro_renderer import compute_macro_bounding_radius, draw_macro_flash
+from gerberdiff.types import MacroAperture
 
 
 def _make_ctx(w: int = 200, h: int = 200) -> tuple[cairo.Context, cairo.ImageSurface]:
@@ -192,7 +192,7 @@ def test_bounding_radius_none_macro() -> None:
 def test_draw_macro_flash_evaluation_failure_emits_warning(monkeypatch) -> None:
     """When evaluate_macro_primitives raises, a UserWarning must be emitted."""
     import pytest
-    import gerberdelta.render.macro_renderer as _mod
+    import gerberdiff.render.macro_renderer as _mod
 
     macro = parse_macro_body("C", "1,1,0.05,0,0,0")
     aperture = MacroAperture(macro_def=macro, params=[], unit_scale=1.0)
