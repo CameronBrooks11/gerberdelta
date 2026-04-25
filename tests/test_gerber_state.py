@@ -165,3 +165,192 @@ def test_malformed_macro_records_error_diagnostic() -> None:
     errors = [d for d in img.diagnostics if d.severity == DiagnosticSeverity.Error]
     assert len(errors) == 1
     assert "badmacro" in errors[0].message
+
+
+# ---------------------------------------------------------------------------
+# P4-1: Block aperture does not leak drawing state
+# ---------------------------------------------------------------------------
+
+
+def test_block_aperture_does_not_leak_aperture_state() -> None:
+    # D01 (draw) inside the block must not change aperture_state for the parent.
+    # After %AB*%, a D03 flash at (0,0) should emit exactly one Flash net.
+    gerber = (
+        "%FSLAX25Y25*%%MOIN*%"
+        "%ADD10C,0.1*%"
+        "%ADD11C,0.1*%"
+        "%ABD12*%"
+        "D10*X0Y0D01*"  # draw inside block (aperture_state=On inside block)
+        "%AB*%"
+        "D11*X0Y0D03*"  # flash in parent -- aperture_state must be Flash, not On
+        "M02*"
+    )
+    img = parse_gerber(gerber)
+    from gerberdelta.types import ApertureState, DrawOp
+    flashes = [op for op in img.draw_ops if isinstance(op, DrawOp) and op.aperture_state == ApertureState.Flash]
+    assert len(flashes) == 1
+
+
+def test_block_aperture_does_not_leak_interpolation_mode() -> None:
+    # G02 (CW arc mode) inside block must not affect parent interpolation.
+    gerber = (
+        "%FSLAX25Y25*%%MOIN*%"
+        "%ADD10C,0.1*%"
+        "%ABD11*%"
+        "G02*"  # CW arc mode inside block
+        "%AB*%"
+        "D10*X10000Y0D01*"  # linear draw in parent
+        "M02*"
+    )
+    img = parse_gerber(gerber)
+    from gerberdelta.types import DrawOp, InterpolationMode
+    linear_ops = [
+        op for op in img.draw_ops
+        if isinstance(op, DrawOp) and op.interpolation == InterpolationMode.Linear
+    ]
+    assert len(linear_ops) >= 1
+
+
+def test_block_aperture_does_not_leak_macro_definition() -> None:
+    # A macro defined inside the block must not appear in the parent macro map.
+    # We verify indirectly: an AD referencing the macro in the parent produces an
+    # Error diagnostic (macro not found), not a successful aperture.
+    gerber = (
+        "%FSLAX25Y25*%%MOIN*%"
+        "%ABD10*%"
+        "%AMINNERCIRC*1,0.1,0,0,0*%"  # macro defined inside block
+        "%AB*%"
+        "%ADD11INNERCIRC,0.1*%"  # reference in parent -- should be Error
+        "M02*"
+    )
+    img = parse_gerber(gerber)
+    errors = [d for d in img.diagnostics if d.severity == DiagnosticSeverity.Error]
+    assert any("INNERCIRC" in d.message for d in errors)
+
+
+def test_block_aperture_does_not_leak_unit_change() -> None:
+    # %MOMM% inside the block must not change the parent unit.
+    # In parent (inch), a coordinate of X100000 with FSLAX25Y25 = 1.0 inch.
+    # If unit leaked as mm, it would be / 25.4 ≈ 0.0394 inch.
+    gerber = (
+        "%FSLAX25Y25*%%MOIN*%"
+        "%ADD10C,0.001*%"
+        "%ABD11*%"
+        "%MOMM*%"  # switch to mm inside block
+        "%AB*%"
+        "D10*X100000Y0D03*"  # flash; with inch unit -> 1.0 inch
+        "M02*"
+    )
+    img = parse_gerber(gerber)
+    from gerberdelta.types import DrawOp
+    ops = [op for op in img.draw_ops if isinstance(op, DrawOp)]
+    assert ops, "expected at least one DrawOp"
+    assert abs(ops[-1].stop_x - 1.0) < 1e-4, f"unit leaked: stop_x={ops[-1].stop_x}"
+
+
+# ---------------------------------------------------------------------------
+# P4-2: Arc bounding box extends beyond chord endpoints
+# ---------------------------------------------------------------------------
+
+
+def test_arc_net_expands_bounding_box_beyond_chord() -> None:
+    # 180-degree CCW arc from (1,0) to (-1,0) centred at origin.
+    # The top of the arc is at y=1; the chord midpoint is at y=0.
+    # The bounding box must include y≈1.0 (the arc peak).
+    # G75 multi-quadrant, G03 CCW, aperture radius 0.
+    # I=-1, J=0 means centre = start + (I,J) = (1,0)+(-1,0) = (0,0). Correct.
+    # FSLAX25Y25 with MOIN: 1 inch = 100000 units.
+    gerber = (
+        "%FSLAX25Y25*%%MOIN*%"
+        "%ADD10C,0.001*%"
+        "D10*"
+        "G75*G03*"
+        "X100000Y0D02*"         # move to start (1,0)
+        "X-100000Y0I-100000J0D01*"  # 180° CCW arc to (-1,0)
+        "M02*"
+    )
+    img = parse_gerber(gerber)
+    assert img.bounding_box.is_valid
+    assert img.bounding_box.max_y > 0.9, (
+        f"arc bbox max_y={img.bounding_box.max_y:.4f} should be ~1.0 for 180° arc"
+    )
+
+
+# ---------------------------------------------------------------------------
+# P4-3: Step-and-repeat bounding box covers all instances
+# ---------------------------------------------------------------------------
+
+
+def test_sr_bounding_box_covers_all_instances() -> None:
+    # SRX3Y1I1.0J0.0: 3 instances spaced 1 inch apart along X.
+    # A flash at (0,0) with 3 instances → last instance at (2,0).
+    # BBox must extend to at least x≈2.0.
+    gerber = (
+        "%FSLAX25Y25*%%MOIN*%"
+        "%ADD10C,0.001*%"
+        "%SRX3Y1I100000J0*%"
+        "D10*X0Y0D03*"
+        "%SR*%"
+        "M02*"
+    )
+    img = parse_gerber(gerber)
+    assert img.bounding_box.is_valid
+    assert img.bounding_box.max_x >= 1.9, (
+        f"SR bbox max_x={img.bounding_box.max_x:.4f} should cover all 3 instances (~2.0)"
+    )
+
+
+# ---------------------------------------------------------------------------
+# P4-4: Step-and-repeat close preserves polarity
+# ---------------------------------------------------------------------------
+
+
+def test_sr_close_preserves_polarity() -> None:
+    # Set clear polarity, open SR, close SR.  Layer after close must be Clear.
+    gerber = (
+        "%FSLAX25Y25*%%MOIN*%"
+        "%LPC*%"                    # clear polarity
+        "%SRX2Y1I100000J0*%"
+        "%ADD10C,0.001*%"
+        "D10*X0Y0D03*"
+        "%SR*%"                     # close SR
+        "M02*"
+    )
+    img = parse_gerber(gerber)
+    last_layer = img.layers[-1]
+    assert last_layer.polarity == Polarity.Clear, (
+        f"SR close reset polarity to {last_layer.polarity}, expected Clear"
+    )
+
+
+# ---------------------------------------------------------------------------
+# P4-6: Unknown macro aperture emits Error; malformed emits Warning
+# ---------------------------------------------------------------------------
+
+
+def test_aperture_forward_reference_unknown_macro_emits_error() -> None:
+    # Reference a macro that was never defined → Error severity.
+    gerber = (
+        "%FSLAX25Y25*%%MOIN*%"
+        "%ADD10NOTDEFINED,1.0*%"
+        "M02*"
+    )
+    img = parse_gerber(gerber)
+    errors = [d for d in img.diagnostics if d.severity == DiagnosticSeverity.Error]
+    assert any("NOTDEFINED" in d.message for d in errors), (
+        f"expected Error about NOTDEFINED, got: {img.diagnostics}"
+    )
+
+
+def test_aperture_malformed_definition_emits_warning_not_error() -> None:
+    # A definition that can't be parsed at all (no D-code) → Warning, not Error.
+    gerber = (
+        "%FSLAX25Y25*%%MOIN*%"
+        "%ADGARBAGE*%"
+        "M02*"
+    )
+    img = parse_gerber(gerber)
+    errors = [d for d in img.diagnostics if d.severity == DiagnosticSeverity.Error]
+    warnings = [d for d in img.diagnostics if d.severity == DiagnosticSeverity.Warning]
+    assert errors == [], f"unexpected errors: {errors}"
+    assert any("aperture" in d.message.lower() for d in warnings)

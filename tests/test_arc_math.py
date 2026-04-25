@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from gerberdelta.parse.arc_math import compute_arc_multi_quadrant, compute_arc_single_quadrant
+from gerberdelta.parse.arc_math import arc_bounding_box, compute_arc_multi_quadrant, compute_arc_single_quadrant
 
 
 def test_multi_quadrant_quarter_circle_ccw() -> None:
@@ -68,3 +68,54 @@ def test_single_quadrant_quarter_circle() -> None:
 def test_single_quadrant_degenerate_returns_none() -> None:
     arc = compute_arc_single_quadrant(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, clockwise=False)
     assert arc is None
+
+
+# ---------------------------------------------------------------------------
+# arc_bounding_box tests
+# ---------------------------------------------------------------------------
+
+
+def test_arc_bounding_box_half_circle_extends_beyond_chord() -> None:
+    # CCW 180° arc from (1,0) to (-1,0), centre (0,0), radius 1.
+    # The top of the arc is at (0, 1); the chord midpoint is at (0, 0).
+    arc = compute_arc_multi_quadrant(1.0, 0.0, -1.0, 0.0, -1.0, 0.0, clockwise=False)
+    assert arc is not None
+    bb = arc_bounding_box(arc)
+    assert bb.max_y > 0.99, f"expected max_y≈1.0, got {bb.max_y}"
+    assert bb.min_y < 0.01, f"expected min_y≈0, got {bb.min_y} (arc doesn't dip below chord)"
+    # The arc does NOT sweep through 270° (bottom), so min_y must stay at 0.
+    assert bb.min_y >= -0.01, f"arc should not extend below y=0"
+
+
+def test_arc_bounding_box_full_circle_equals_diameter() -> None:
+    # Full circle: radius 1, centre (0,0).  Bbox must be [-1, -1] to [1, 1].
+    arc = compute_arc_multi_quadrant(1.0, 0.0, 1.0, 0.0, -1.0, 0.0, clockwise=False)
+    assert arc is not None
+    bb = arc_bounding_box(arc)
+    assert abs(bb.max_x - 1.0) < 1e-6
+    assert abs(bb.min_x - (-1.0)) < 1e-6
+    assert abs(bb.max_y - 1.0) < 1e-6
+    assert abs(bb.min_y - (-1.0)) < 1e-6
+
+
+def test_arc_bounding_box_quarter_circle_covers_axis_extremum() -> None:
+    # CCW quarter arc from (1,0) to (0,1), centre (0,0).
+    # The arc sweeps 0°→90° so only the 90° extremum (0,1) is hit, which is
+    # already an endpoint.  The 0° extremum (1,0) is the start endpoint.
+    # Neither 180° nor 270° is in the range, so bbox = [(0,0), (1,1)].
+    arc = compute_arc_multi_quadrant(1.0, 0.0, 0.0, 1.0, -1.0, 0.0, clockwise=False)
+    assert arc is not None
+    bb = arc_bounding_box(arc)
+    assert abs(bb.max_x - 1.0) < 1e-6
+    assert abs(bb.max_y - 1.0) < 1e-6
+    assert bb.min_x >= -1e-9
+    assert bb.min_y >= -1e-9
+
+
+def test_arc_bounding_box_aperture_radius_padding() -> None:
+    # Full circle with aperture radius 0.1 → bbox should be [-1.1, -1.1] to [1.1, 1.1].
+    arc = compute_arc_multi_quadrant(1.0, 0.0, 1.0, 0.0, -1.0, 0.0, clockwise=False)
+    assert arc is not None
+    bb = arc_bounding_box(arc, aperture_radius=0.1)
+    assert abs(bb.max_x - 1.1) < 1e-6
+    assert abs(bb.min_x - (-1.1)) < 1e-6

@@ -151,11 +151,18 @@ def parse_aperture_definition(
     tuple[
         int, CircleAperture | RectangleAperture | ObroundAperture | PolygonAperture | MacroAperture
     ]
+    | str
     | None
 ):
     """Parse an AD... extended command string (without the % delimiters).
 
-    Returns (d_code, aperture) or None if unparseable.
+    Returns:
+        ``(d_code, aperture)`` on success.
+        ``"MACRO_NOT_FOUND:<name>"`` when the aperture type is a macro name not
+        present in *macro_map* (the aperture is unrecoverable; callers should
+        emit an Error diagnostic).
+        ``None`` if the definition string is malformed/unparseable.
+
     d_code must be >= 10 (codes 1-9 are reserved per RS-274X spec).
 
     Standard aperture types: C (Circle), R (Rectangle), O (Obround), P (Polygon).
@@ -229,7 +236,7 @@ def parse_aperture_definition(
     # Macro aperture -- look up definition by name
     macro_def = macro_map.get(aperture_name)
     if macro_def is None:
-        return None
+        return f"MACRO_NOT_FOUND:{aperture_name}"
     return d_code, MacroAperture(
         macro_def=macro_def,
         params=params,

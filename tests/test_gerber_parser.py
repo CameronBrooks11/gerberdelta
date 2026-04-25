@@ -138,8 +138,11 @@ def test_parse_aperture_definition_dcode_too_small() -> None:
 
 
 def test_parse_aperture_definition_unknown_macro() -> None:
-    # Macro name not in macro_map -> None
-    assert parse_aperture_definition("ADD10MYMACRO,1.0", UnitType.Inch, {}) is None
+    # Macro name not in macro_map -> sentinel string (not None)
+    result = parse_aperture_definition("ADD10MYMACRO,1.0", UnitType.Inch, {})
+    assert isinstance(result, str)
+    assert result.startswith("MACRO_NOT_FOUND:")
+    assert "MYMACRO" in result
 
 
 def test_format_statement_is_dataclass() -> None:
@@ -153,3 +156,11 @@ def test_format_statement_is_dataclass() -> None:
     )
     assert fs.x_integer == 2
     assert fs.y_decimal == 5
+
+
+def test_convert_explicit_zero_omission() -> None:
+    # ZeroOmission.Explicit falls through to the same branch as Leading:
+    # raw_int is the full integer representation, divide by 10^dec_digits.
+    leading = convert_coordinate(12500, "12500", 2, 5, ZeroOmission.Leading, UnitType.Inch)
+    explicit = convert_coordinate(12500, "12500", 2, 5, ZeroOmission.Explicit, UnitType.Inch)
+    assert abs(leading - explicit) < 1e-12

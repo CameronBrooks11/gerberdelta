@@ -59,16 +59,20 @@ def _parse_unit_line(upper: str) -> _FormatSpec:
     return _FormatSpec(unit=unit, zero_suppression=zs, integer_digits=int_d, decimal_digits=dec_d)
 
 
-def _apply_format(raw: str, spec: _FormatSpec) -> float:
+def _apply_format(raw: str, spec: _FormatSpec) -> tuple[float, bool]:
     """Convert a raw coordinate token to a float in *spec.unit*'s native units.
 
     If the token contains a decimal point it is used directly (KiCad modern
     output and any explicit-decimal generator).  Otherwise the integer string
     is padded according to the zero-suppression convention and the decimal
     point is inserted at the configured position.
+
+    Returns a ``(value, truncated)`` pair.  *truncated* is ``True`` when the
+    input had more digits than the format allows; callers should emit a
+    diagnostic warning in that case.
     """
     if "." in raw:
-        return float(raw)
+        return float(raw), False
 
     total = spec.integer_digits + spec.decimal_digits
     sign = ""
@@ -77,6 +81,8 @@ def _apply_format(raw: str, spec: _FormatSpec) -> float:
         sign = raw[0]
         digits = raw[1:]
 
+    truncated = len(digits) > total
+
     if spec.zero_suppression == "TZ":
         # Trailing zeros suppressed in file → right-pad to restore them
         digits = digits.ljust(total, "0")
@@ -84,11 +90,14 @@ def _apply_format(raw: str, spec: _FormatSpec) -> float:
         # Leading zeros suppressed in file (LZ) → left-pad to restore them
         digits = digits.zfill(total)
 
+    if truncated:
+        digits = digits[:total]
+
     if spec.decimal_digits > 0:
         int_part = digits[: -spec.decimal_digits] or "0"
         dec_part = digits[-spec.decimal_digits :]
-        return float(f"{sign}{int_part}.{dec_part}")
-    return float(f"{sign}{digits}")
+        return float(f"{sign}{int_part}.{dec_part}"), truncated
+    return float(f"{sign}{digits}"), truncated
 
 
 def _to_inches(value: float, unit: UnitType) -> float:
@@ -132,7 +141,15 @@ def _parse_coord_line(
     y_val: float | None = None
     for letter_match in re.finditer(r"([XY])([+-]?\d+(?:\.\d+)?)", line, re.IGNORECASE):
         letter = letter_match.group(1).upper()
-        val = _apply_format(letter_match.group(2), format_spec)
+        val, truncated = _apply_format(letter_match.group(2), format_spec)
+        if truncated:
+            diagnostics.append(
+                Diagnostic(
+                    DiagnosticSeverity.Warning,
+                    f"Coordinate field has more digits than format allows; truncated (line {lineno})",
+                    lineno,
+                )
+            )
         if letter == "X":
             x_val = val
         elif letter == "Y":

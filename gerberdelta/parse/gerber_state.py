@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from gerberdelta.parse.arc_math import compute_arc_multi_quadrant, compute_arc_single_quadrant
+from gerberdelta.parse.arc_math import arc_bounding_box, compute_arc_multi_quadrant, compute_arc_single_quadrant
 from gerberdelta.parse.gerber_parser import (
     FormatStatement,
     convert_coordinate,
@@ -88,6 +88,13 @@ class _BlockFrame:
     saved_apertures: dict[int, Aperture]
     saved_bbox: BoundingBox
     saved_layer_idx: int
+    saved_net_state_idx: int
+    saved_current_aperture: int
+    saved_aperture_state: ApertureState
+    saved_interpolation: InterpolationMode
+    saved_multi_quadrant: bool
+    saved_unit: UnitType
+    saved_macro_map: dict[str, MacroDef]
 
 
 # ---------------------------------------------------------------------------
@@ -300,9 +307,26 @@ class _GerberParser:
 
         # Expand bounding box
         r = self._aperture_radius()
-        self._bbox.expand(stop_x, stop_y, r)
-        if self._aperture_state == ApertureState.On:
-            self._bbox.expand(self._prev_x, self._prev_y, r)
+        if arc_segment is not None:
+            ab = arc_bounding_box(arc_segment, r)
+            self._bbox.expand(ab.min_x, ab.min_y)
+            self._bbox.expand(ab.max_x, ab.max_y)
+        else:
+            self._bbox.expand(stop_x, stop_y, r)
+            if self._aperture_state == ApertureState.On:
+                self._bbox.expand(self._prev_x, self._prev_y, r)
+
+        # Also expand for all step-and-repeat instances of the current layer.
+        sr = self._current_layer().step_and_repeat
+        if sr.x > 1 or sr.y > 1:
+            for ix in range(sr.x):
+                for iy in range(sr.y):
+                    if ix == 0 and iy == 0:
+                        continue  # already handled above
+                    ox, oy = ix * sr.dist_x, iy * sr.dist_y
+                    self._bbox.expand(stop_x + ox, stop_y + oy, r)
+                    if self._aperture_state == ApertureState.On:
+                        self._bbox.expand(self._prev_x + ox, self._prev_y + oy, r)
 
         self._prev_x = stop_x
         self._prev_y = stop_y
@@ -414,6 +438,10 @@ class _GerberParser:
             result = parse_aperture_definition(body, self._unit, self._macro_map)
             if result is None:
                 self._warn(f"Could not parse aperture definition: {body!r}", line)
+            elif isinstance(result, str):
+                # result == "MACRO_NOT_FOUND:<name>" -- the aperture is permanently absent
+                macro_name = result.split(":", 1)[1] if ":" in result else result
+                self._error(f"Aperture definition references undefined macro {macro_name!r}", line)
             else:
                 d_code, aperture = result
                 self._apertures[d_code] = aperture
@@ -542,6 +570,13 @@ class _GerberParser:
                     saved_apertures=self._apertures,
                     saved_bbox=self._bbox,
                     saved_layer_idx=self._current_layer_idx,
+                    saved_net_state_idx=self._current_net_state_idx,
+                    saved_current_aperture=self._current_aperture,
+                    saved_aperture_state=self._aperture_state,
+                    saved_interpolation=self._interpolation,
+                    saved_multi_quadrant=self._multi_quadrant,
+                    saved_unit=self._unit,
+                    saved_macro_map=self._macro_map,
                 )
             )
 
@@ -553,6 +588,14 @@ class _GerberParser:
             # Copy parent apertures so the block can reference them.
             self._apertures = dict(self._apertures)
             self._bbox = BoundingBox()
+            # Reset drawing cursor state to safe defaults inside the block.
+            self._current_aperture = 0
+            self._aperture_state = ApertureState.Off
+            self._interpolation = InterpolationMode.Linear
+            self._multi_quadrant = False
+            # Block gets a copy of the macro map; new macros defined inside
+            # the block do not leak back to the parent.
+            self._macro_map = dict(self._macro_map)
 
         else:
             # Close: %AB*%
@@ -571,6 +614,13 @@ class _GerberParser:
             self._apertures = frame.saved_apertures
             self._bbox = frame.saved_bbox
             self._current_layer_idx = frame.saved_layer_idx
+            self._current_net_state_idx = frame.saved_net_state_idx
+            self._current_aperture = frame.saved_current_aperture
+            self._aperture_state = frame.saved_aperture_state
+            self._interpolation = frame.saved_interpolation
+            self._multi_quadrant = frame.saved_multi_quadrant
+            self._unit = frame.saved_unit
+            self._macro_map = frame.saved_macro_map
 
             # Register the completed block aperture in the parent aperture dict.
             self._apertures[frame.d_code] = frame.block_ap
@@ -578,8 +628,18 @@ class _GerberParser:
     def _handle_sr(self, params: str, line: int) -> None:
         """Handle the SR body after stripping the 'SR' prefix."""
         if not params.strip():
-            # Close SR block -- push a fresh default layer
-            self._layers.append(LayerState())
+            # Close SR block -- push a new layer that copies the parent's
+            # polarity/rotation/mirror/scale/name but resets step_and_repeat.
+            prev = self._current_layer()
+            new_layer = LayerState(
+                polarity=prev.polarity,
+                rotation=prev.rotation,
+                mirror=prev.mirror,
+                scale=prev.scale,
+                name=prev.name,
+                # step_and_repeat intentionally left at default (1, 1, 0, 0)
+            )
+            self._layers.append(new_layer)
             self._current_layer_idx = len(self._layers) - 1
             return
 

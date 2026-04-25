@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from gerberdelta.types import ArcSegment
+from gerberdelta.types import ArcSegment, BoundingBox
 
 _RAD_TO_DEG = 180.0 / math.pi
 
@@ -119,3 +119,42 @@ def compute_arc_single_quadrant(
             )
 
     return best
+
+
+def arc_bounding_box(arc: ArcSegment, aperture_radius: float = 0.0) -> BoundingBox:
+    """Return the axis-aligned bounding box of an arc segment.
+
+    Correctly handles multi-quadrant arcs by checking whether any of the four
+    axis-extrema angles (0, 90, 180, 270 degrees) fall within the swept range.
+
+    *aperture_radius* is added as padding on all sides (half the trace width).
+    """
+    bb = BoundingBox()
+    cx, cy, r = arc.center_x, arc.center_y, arc.radius
+
+    # Expand by both endpoints.
+    for theta_deg in (arc.start_angle_deg, arc.end_angle_deg):
+        theta_rad = math.radians(theta_deg)
+        bb.expand(cx + r * math.cos(theta_rad), cy + r * math.sin(theta_rad), aperture_radius)
+
+    # Determine the angular range covered by the arc.  The ArcSegment convention
+    # (set by compute_arc_multi_quadrant / compute_arc_single_quadrant) is:
+    #   CCW arcs: end_angle_deg > start_angle_deg
+    #   CW arcs:  end_angle_deg < start_angle_deg
+    # So [lo, hi] = [min, max] covers the swept interval regardless of direction.
+    lo = min(arc.start_angle_deg, arc.end_angle_deg)
+    hi = max(arc.start_angle_deg, arc.end_angle_deg)
+
+    # For each axis extremum (0°, 90°, 180°, 270°), check whether any integer
+    # multiple of 360° shifted copy of that angle falls in [lo, hi].  If so,
+    # the arc passes through that extremum and we must expand the bbox.
+    for axis_angle in (0.0, 90.0, 180.0, 270.0):
+        k_start = math.ceil((lo - axis_angle) / 360.0)
+        for k in range(k_start, k_start + 4):
+            candidate = axis_angle + 360.0 * k
+            if lo <= candidate <= hi:
+                theta_rad = math.radians(axis_angle)
+                bb.expand(cx + r * math.cos(theta_rad), cy + r * math.sin(theta_rad), aperture_radius)
+                break
+
+    return bb
