@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from gerberdelta.parse.tokenizer import TokenType, tokenize_gerber
+from gerberdelta.parse.tokenizer import Token, TokenType, tokenize_gerber
 
 
-def tokens(s: str) -> list:
+def tokens(s: str) -> list[Token]:
     return list(tokenize_gerber(s))
 
 
