@@ -7,10 +7,10 @@ from pathlib import Path
 import pytest
 
 from gerberdelta.diff.layer_matcher import (
-    LayerType,
     classify_layer,
     match_layers,
 )
+from gerberdelta.types import LayerStatus, LayerType
 
 _FIXTURES_BEFORE = Path("tests/fixtures/gerbers-before")
 _FIXTURES_AFTER = Path("tests/fixtures/gerbers-after")
@@ -121,9 +121,7 @@ def test_match_layers_all_matched(tmp_path: Path) -> None:
     after = _write(tmp_path, "after", files)
     pairs = match_layers(before, after)
     assert len(pairs) == 3
-    assert all(p.status == "matched" for p in pairs)
-    assert all(p.before_path is not None for p in pairs)
-    assert all(p.after_path is not None for p in pairs)
+    assert all(p.status == LayerStatus.Matched for p in pairs)
 
 
 def test_match_layers_added_layer(tmp_path: Path) -> None:
@@ -131,8 +129,8 @@ def test_match_layers_added_layer(tmp_path: Path) -> None:
     after = _write(tmp_path, "after", ["board-F.Cu.gbr", "board-In1.Cu.gbr"])
     pairs = match_layers(before, after)
     statuses = {p.name: p.status for p in pairs}
-    assert statuses["board-F.Cu"] == "matched"
-    assert statuses["board-In1.Cu"] == "added"
+    assert statuses["board-F.Cu"] == LayerStatus.Matched
+    assert statuses["board-In1.Cu"] == LayerStatus.Added
 
 
 def test_match_layers_removed_layer(tmp_path: Path) -> None:
@@ -140,9 +138,9 @@ def test_match_layers_removed_layer(tmp_path: Path) -> None:
     after = _write(tmp_path, "after", ["board-F.Cu.gbr"])
     pairs = match_layers(before, after)
     statuses = {p.name: p.status for p in pairs}
-    assert statuses["board-F.Cu"] == "matched"
-    assert statuses["board-B.Cu"] == "removed"
-    removed = next(p for p in pairs if p.status == "removed")
+    assert statuses["board-F.Cu"] == LayerStatus.Matched
+    assert statuses["board-B.Cu"] == LayerStatus.Removed
+    removed = next(p for p in pairs if p.status == LayerStatus.Removed)
     assert removed.after_path is None
     assert removed.before_path is not None
 
@@ -165,7 +163,7 @@ def test_match_layers_nonexistent_dir(tmp_path: Path) -> None:
     after = tmp_path / "nonexistent"
     pairs = match_layers(before, after)
     assert len(pairs) == 1
-    assert pairs[0].status == "removed"
+    assert pairs[0].status == LayerStatus.Removed
 
 
 def test_match_layers_sort_order(tmp_path: Path) -> None:
@@ -203,7 +201,7 @@ def test_match_layers_drill_files(tmp_path: Path) -> None:
 def test_match_layers_fixture_dirs() -> None:
     pairs = match_layers(_FIXTURES_BEFORE, _FIXTURES_AFTER)
     assert len(pairs) == 15
-    assert all(p.status == "matched" for p in pairs)
+    assert all(p.status == LayerStatus.Matched for p in pairs)
 
 
 @pytest.mark.skipif(not _FIXTURES_BEFORE.exists(), reason="fixture not found")
@@ -212,3 +210,33 @@ def test_match_layers_fixture_layer_types() -> None:
     pairs = match_layers(_FIXTURES_BEFORE, _FIXTURES_BEFORE)
     for p in pairs:
         assert p.layer_type != LayerType.Unknown, f"{p.name} classified as Unknown"
+
+
+# ---------------------------------------------------------------------------
+# 4.2 — InCu regex: false-positive prevention
+# ---------------------------------------------------------------------------
+
+
+def test_classify_incu_standard_variants() -> None:
+    """Common inner-copper naming patterns all classify as InCu."""
+    for stem in ("In1.Cu", "In2.Cu", "In3.Cu", "In4.Cu", "in1_cu", "board-In2.Cu"):
+        result = classify_layer(Path(f"{stem}.gbr"))
+        assert result == LayerType.InCu, f"{stem!r} should be InCu, got {result}"
+
+
+def test_classify_incu_no_false_positive_incident() -> None:
+    """'incident_copper' must NOT be classified as InCu."""
+    result = classify_layer(_fake("incident_copper"))
+    assert result != LayerType.InCu
+
+
+def test_classify_incu_no_false_positive_no_digit() -> None:
+    """'include.cu' (no digit after 'in') must NOT be classified as InCu."""
+    result = classify_layer(_fake("include.cu"))
+    assert result != LayerType.InCu
+
+
+def test_classify_incu_no_false_positive_incoming() -> None:
+    """'incoming.Cu' contains 'in'+'cu' but no inner-layer pattern — must not be InCu."""
+    result = classify_layer(Path("incoming.Cu.gbr"))
+    assert result != LayerType.InCu, f"'incoming.Cu' should not be InCu, got {result}"

@@ -29,13 +29,11 @@ Stem keyword matching (case-insensitive, substring) determines ``LayerType``:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
 
-# ---------------------------------------------------------------------------
-# Enums and types
-# ---------------------------------------------------------------------------
+from gerberdelta.types import LayerStatus, LayerType
 
 _GERBER_SUFFIXES = frozenset(
     {
@@ -58,23 +56,9 @@ _EXCELLON_SUFFIXES = frozenset({".drl", ".exc", ".xln", ".ncd"})
 _LAYER_SUFFIXES = _GERBER_SUFFIXES | _EXCELLON_SUFFIXES
 
 
-class LayerType(StrEnum):
-    FCu = "FCu"
-    BCu = "BCu"
-    InCu = "InCu"
-    FMask = "FMask"
-    BMask = "BMask"
-    FPaste = "FPaste"
-    BPaste = "BPaste"
-    FSilk = "FSilk"
-    BSilk = "BSilk"
-    EdgeCuts = "EdgeCuts"
-    NPTH = "NPTH"
-    PTH = "PTH"
-    Drill = "Drill"
-    Unknown = "Unknown"
-
-
+# ---------------------------------------------------------------------------
+# Data types
+# ---------------------------------------------------------------------------
 @dataclass
 class LayerPair:
     """A matched, added, or removed layer."""
@@ -83,7 +67,7 @@ class LayerPair:
     before_path: Path | None  # None -> layer was added in after/
     after_path: Path | None  # None -> layer was removed from before/
     layer_type: LayerType
-    status: str  # "matched" | "added" | "removed"
+    status: LayerStatus  # Matched | Added | Removed
 
 
 # ---------------------------------------------------------------------------
@@ -108,11 +92,11 @@ def match_layers(before_dir: Path, after_dir: Path) -> list[LayerPair]:
         a_path = after_files.get(stem)
 
         if b_path is not None and a_path is not None:
-            status = "matched"
+            status = LayerStatus.Matched
         elif b_path is not None:
-            status = "removed"
+            status = LayerStatus.Removed
         else:
-            status = "added"
+            status = LayerStatus.Added
 
         # Determine layer type from whichever path is available.
         sample_path = b_path if b_path is not None else a_path
@@ -167,7 +151,7 @@ def _classify(stem: str, path: Path) -> LayerType:
         return LayerType.FCu
     if "b.cu" in s or "b_cu" in s or "back_copper" in s or "back copper" in s:
         return LayerType.BCu
-    if "in" in s and "cu" in s:
+    if re.search(r"\bin\d+[._]cu\b", s):
         return LayerType.InCu
     if "f.mask" in s or "f_mask" in s:
         return LayerType.FMask

@@ -75,6 +75,29 @@ class DiagnosticSeverity(StrEnum):
     Info = "info"  # informational, suppressed unless -v
 
 
+class LayerStatus(StrEnum):
+    Matched = "matched"
+    Added = "added"
+    Removed = "removed"
+
+
+class LayerType(StrEnum):
+    FCu = "FCu"
+    BCu = "BCu"
+    InCu = "InCu"
+    FMask = "FMask"
+    BMask = "BMask"
+    FPaste = "FPaste"
+    BPaste = "BPaste"
+    FSilk = "FSilk"
+    BSilk = "BSilk"
+    EdgeCuts = "EdgeCuts"
+    NPTH = "NPTH"
+    PTH = "PTH"
+    Drill = "Drill"
+    Unknown = "Unknown"
+
+
 # ---------------------------------------------------------------------------
 # Geometric primitives
 # ---------------------------------------------------------------------------
@@ -284,8 +307,8 @@ class Region:
 @dataclass
 class LayerDiffResult:
     name: str
-    status: str  # "matched" | "added" | "removed"
-    layer_type: str  # LayerType.name from layer_matcher (e.g. "FCu", "Drill")
+    status: LayerStatus  # matched | added | removed
+    layer_type: LayerType
     changed_pixel_count: int
     total_pixel_count: int
     regions: list[Region]

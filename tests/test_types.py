@@ -15,6 +15,8 @@ from gerberdelta.types import (
     InterpolationMode,
     LayerDiffResult,
     LayerState,
+    LayerStatus,
+    LayerType,
     MirrorState,
     ParsedImage,
     Polarity,
@@ -104,8 +106,8 @@ def test_diff_result_has_changes_stored_field() -> None:
     """has_changes must be a plain stored field, not a computed property."""
     layer = LayerDiffResult(
         name="F.Cu",
-        status="matched",
-        layer_type="FCu",
+        status=LayerStatus.Matched,
+        layer_type=LayerType.FCu,
         changed_pixel_count=0,
         total_pixel_count=1000,
         regions=[],
@@ -141,8 +143,8 @@ def test_net_construction() -> None:
 def test_layer_diff_result_changed_fraction() -> None:
     layer = LayerDiffResult(
         name="B.Cu",
-        status="matched",
-        layer_type="BCu",
+        status=LayerStatus.Matched,
+        layer_type=LayerType.BCu,
         changed_pixel_count=250,
         total_pixel_count=1000,
         regions=[],
@@ -153,8 +155,8 @@ def test_layer_diff_result_changed_fraction() -> None:
 def test_layer_diff_result_changed_fraction_zero_denominator() -> None:
     layer = LayerDiffResult(
         name="B.Cu",
-        status="added",
-        layer_type="BCu",
+        status=LayerStatus.Added,
+        layer_type=LayerType.BCu,
         changed_pixel_count=0,
         total_pixel_count=0,
         regions=[],

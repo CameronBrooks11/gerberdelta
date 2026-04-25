@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-04-25
+
+### Changed
+
+- **`LayerType` moved to `types.py`** -- `LayerType` was defined in
+  `diff/layer_matcher.py` but is a domain type used across the IR, diff, export,
+  and CLI layers. Moving it to `types.py` removes the asymmetry and aligns it
+  with all other domain enums.
+
+- **`LayerStatus` StrEnum added** (`types.py`) -- replaces bare `str` on
+  `LayerDiffResult.status` and `LayerPair.status`. Values: `Matched`, `Added`,
+  `Removed`. All construction sites in `layer_matcher.py`, `cli.py`,
+  `json_report.py`, and tests updated. `StrEnum` ensures JSON serialisation
+  produces the same string values as before.
+
+- **`LayerDiffResult.layer_type` typed as `LayerType`** -- was `str` with a
+  comment; is now the proper enum. `layer_type=pair.layer_type.value` call sites
+  simplified to `layer_type=pair.layer_type`.
+
+### Fixed
+
+- **`InCu` classification false-positives** (`layer_matcher.py`) -- the previous
+  check `"in" in s and "cu" in s` matched any filename containing both
+  substrings (e.g. `incident_copper`, `incoming.Cu`). Replaced with
+  `re.search(r"\bin\d+[._]cu\b", s)` which requires a digit immediately after
+  `in` and a word boundary on both sides. Four new tests verify correct
+  classification and absence of false positives.
+
 ## [0.17.0] - 2026-04-25
 
 ### Fixed

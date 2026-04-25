@@ -8,7 +8,14 @@ from pathlib import Path
 import pytest
 
 from gerberdelta.export.json_report import build_report, write_report
-from gerberdelta.types import BoundingBox, DiffResult, LayerDiffResult, Region
+from gerberdelta.types import (
+    BoundingBox,
+    DiffResult,
+    LayerDiffResult,
+    LayerStatus,
+    LayerType,
+    Region,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -33,11 +40,11 @@ def _region(rid: int = 1, px: int = 100) -> Region:
 
 def _layer(
     name: str = "F.Cu",
-    status: str = "matched",
+    status: LayerStatus = LayerStatus.Matched,
     changed: int = 100,
     total: int = 1000,
     regions: list[Region] | None = None,
-    layer_type: str = "FCu",
+    layer_type: LayerType = LayerType.FCu,
 ) -> LayerDiffResult:
     return LayerDiffResult(
         name=name,
@@ -50,7 +57,7 @@ def _layer(
 
 
 def _diff(*layers: LayerDiffResult, has_changes: bool | None = None) -> DiffResult:
-    hc = any(lr.changed_pixel_count > 0 or lr.status != "matched" for lr in layers)
+    hc = any(lr.changed_pixel_count > 0 or lr.status != LayerStatus.Matched for lr in layers)
     return DiffResult(
         layers=list(layers), has_changes=has_changes if has_changes is not None else hc
     )
@@ -89,7 +96,7 @@ def test_build_report_summary_with_changes() -> None:
 
 
 def test_build_report_layer_fields() -> None:
-    dr = _diff(_layer(name="B.Cu", status="matched", changed=200, total=4000))
+    dr = _diff(_layer(name="B.Cu", status=LayerStatus.Matched, changed=200, total=4000))
     layer = build_report(dr)["layers"][0]
     assert layer["name"] == "B.Cu"
     assert layer["status"] == "matched"
@@ -99,7 +106,7 @@ def test_build_report_layer_fields() -> None:
 
 
 def test_build_report_added_layer() -> None:
-    dr = _diff(_layer(name="In1.Cu", status="added", changed=1000, total=1000))
+    dr = _diff(_layer(name="In1.Cu", status=LayerStatus.Added, layer_type=LayerType.InCu, changed=1000, total=1000))
     report = build_report(dr)
     assert report["summary"]["changed_layers"] == 1
     assert report["layers"][0]["status"] == "added"

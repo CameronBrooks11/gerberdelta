@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 
 from gerberdelta import __version__
-from gerberdelta.types import DiagnosticSeverity
+from gerberdelta.types import DiagnosticSeverity, LayerStatus
 
 _EXCELLON_SUFFIXES = frozenset({".drl", ".exc", ".xln", ".ncd"})
 _MEMORY_WARN_PIXELS = 16_777_216  # 4096^2
@@ -287,8 +287,8 @@ def diff_cmd(
         t_layer = time.perf_counter()
 
         # Added / removed layers: report 100% changed without rendering both.
-        if pair.status in ("added", "removed"):
-            src_path = pair.after_path if pair.status == "added" else pair.before_path
+        if pair.status in (LayerStatus.Added, LayerStatus.Removed):
+            src_path = pair.after_path if pair.status == LayerStatus.Added else pair.before_path
             if src_path is None:
                 click.echo(
                     f"error: {pair.name}: {pair.status} layer has no associated path",
@@ -308,7 +308,7 @@ def diff_cmd(
             lr = LayerDiffResult(
                 name=pair.name,
                 status=pair.status,
-                layer_type=pair.layer_type.value,
+                layer_type=pair.layer_type,
                 changed_pixel_count=total_px,
                 total_pixel_count=total_px,
                 regions=[],
@@ -363,8 +363,8 @@ def diff_cmd(
 
         lr = LayerDiffResult(
             name=pair.name,
-            status="matched",
-            layer_type=pair.layer_type.value,
+            status=LayerStatus.Matched,
+            layer_type=pair.layer_type,
             changed_pixel_count=result.changed_pixel_count,
             total_pixel_count=result.total_pixel_count,
             regions=result.regions,
@@ -400,7 +400,7 @@ def diff_cmd(
                 sys.exit(1)
 
     # Build DiffResult
-    has_changes = any(lr.changed_pixel_count > 0 or lr.status != "matched" for lr in layer_results)
+    has_changes = any(lr.changed_pixel_count > 0 or lr.status != LayerStatus.Matched for lr in layer_results)
     diff_result = DiffResult(layers=layer_results, has_changes=has_changes)
 
     # JSON report
@@ -416,7 +416,7 @@ def diff_cmd(
     # Terminal summary
     if not quiet:
         changed_layers = sum(
-            1 for lr in layer_results if lr.changed_pixel_count > 0 or lr.status != "matched"
+            1 for lr in layer_results if lr.changed_pixel_count > 0 or lr.status != LayerStatus.Matched
         )
         click.echo(
             f"diff: {changed_layers}/{len(layer_results)} layers changed  "
