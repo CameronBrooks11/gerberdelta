@@ -177,5 +177,225 @@ def render_cmd(
         click.echo(f"nets: {len(img.nets)}  apertures: {len(img.apertures)}")
 
 
+# ---------------------------------------------------------------------------
+# diff subcommand
+# ---------------------------------------------------------------------------
+
+
+@cli.command("diff")
+@click.argument("before_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.argument("after_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.option(
+    "--layer", "layers", multiple=True,
+    help="Restrict diff to this layer name (repeatable).",
+)
+@click.option("--width", default=2048, show_default=True, help="Canvas width in pixels.")
+@click.option("--height", default=2048, show_default=True, help="Canvas height in pixels.")
+@click.option("--min-pixels", default=4, show_default=True,
+              help="Minimum changed-pixel count to report a region.")
+@click.option("--merge-tolerance", default=0.05, show_default=True,
+              help="Region merge padding in inches.")
+@click.option("--out-json", type=click.Path(dir_okay=False, path_type=Path),
+              help="Write JSON report to this file.")
+@click.option("--out-png", "out_png_dir", type=click.Path(file_okay=False, path_type=Path),
+              help="Write diff overlay PNG(s) to this directory.")
+@click.option("--overwrite", is_flag=True, help="Allow overwriting existing output files.")
+@click.option("--png-show-common", is_flag=True,
+              help="Include unchanged geometry as grey in PNG overlay.")
+@click.option("--align-offset", default="0,0", show_default=True,
+              help="Translate image B by X,Y inches before diffing (e.g. '0.5,0').")
+@click.option("--fail-on-diff", is_flag=True,
+              help="Exit with code 1 if any changes are detected.")
+@click.option("-q", "--quiet", is_flag=True, help="Suppress all output except errors.")
+@click.option("-v", "--verbose", is_flag=True, help="Print per-layer and per-region detail.")
+def diff_cmd(
+    before_dir: Path,
+    after_dir: Path,
+    layers: tuple[str, ...],
+    width: int,
+    height: int,
+    min_pixels: int,
+    merge_tolerance: float,
+    out_json: Path | None,
+    out_png_dir: Path | None,
+    overwrite: bool,
+    png_show_common: bool,
+    align_offset: str,
+    fail_on_diff: bool,
+    quiet: bool,
+    verbose: bool,
+) -> None:
+    """Compare two directories of Gerber/Excellon layer files."""
+    import time
+
+    from gerberdelta.diff.diff_engine import compute_diff
+    from gerberdelta.diff.layer_matcher import match_layers
+    from gerberdelta.export.json_report import write_report
+    from gerberdelta.export.png_export import build_overlay_png
+    from gerberdelta.parse.excellon_parser import parse_excellon
+    from gerberdelta.parse.gerber_state import parse_gerber
+    from gerberdelta.types import DiffResult, LayerDiffResult
+
+    # Parse --align-offset
+    try:
+        ox_str, oy_str = align_offset.split(",", 1)
+        alignment_offset: tuple[float, float] | None = (float(ox_str), float(oy_str))
+        if alignment_offset == (0.0, 0.0):
+            alignment_offset = None
+    except ValueError:
+        click.echo("error: --align-offset must be two comma-separated floats (e.g. '0.5,0')",
+                   err=True)
+        sys.exit(2)
+
+    # Memory warning
+    total_pixels = width * height
+    if total_pixels > _MEMORY_WARN_PIXELS and not quiet:
+        mb = (total_pixels * 4) / (1024 * 1024)
+        click.echo(
+            f"warning: canvas {width}x{height} = {total_pixels:,} pixels (~{mb:.0f} MB)",
+            err=True,
+        )
+
+    # Match layers
+    pairs = match_layers(before_dir, after_dir)
+    if layers:
+        pairs = [p for p in pairs if p.name in layers]
+
+    layer_results: list[LayerDiffResult] = []
+    t_start = time.perf_counter()
+
+    for pair in pairs:
+        t_layer = time.perf_counter()
+
+        # Added / removed layers: report 100% changed without rendering both.
+        if pair.status in ("added", "removed"):
+            src_path = pair.after_path if pair.status == "added" else pair.before_path
+            assert src_path is not None
+            try:
+                content = src_path.read_text(errors="replace")
+            except OSError as exc:
+                click.echo(f"error: {exc}", err=True)
+                sys.exit(1)
+            if src_path.suffix.lower() in _EXCELLON_SUFFIXES:
+                img = parse_excellon(content, source_path=src_path)
+            else:
+                img = parse_gerber(content, source_path=src_path)
+            total_px = width * height
+            lr = LayerDiffResult(
+                name=pair.name,
+                status=pair.status,
+                layer_type=pair.layer_type.value,
+                changed_pixel_count=total_px,
+                total_pixel_count=total_px,
+                regions=[],
+            )
+            layer_results.append(lr)
+            if verbose:
+                click.echo(f"  {pair.name}: {pair.status} (100% changed)")
+            continue
+
+        # Matched layers: full diff
+        assert pair.before_path is not None
+        assert pair.after_path is not None
+
+        def _parse(path: Path) -> object:
+            try:
+                content = path.read_text(errors="replace")
+            except OSError as exc:
+                click.echo(f"error: {exc}", err=True)
+                sys.exit(1)
+            if path.suffix.lower() in _EXCELLON_SUFFIXES:
+                return parse_excellon(content, source_path=path)
+            return parse_gerber(content, source_path=path)
+
+        from gerberdelta.types import ParsedImage as _PI
+        img_a: _PI = _parse(pair.before_path)  # type: ignore[assignment]
+        img_b: _PI = _parse(pair.after_path)   # type: ignore[assignment]
+
+        # Abort on parse errors.
+        for img, path in ((img_a, pair.before_path), (img_b, pair.after_path)):
+            for diag in img.diagnostics:
+                loc = f" (line {diag.line})" if diag.line else ""
+                if diag.severity == DiagnosticSeverity.Error:
+                    click.echo(f"error: {path.name}: {diag.message}{loc}", err=True)
+                    sys.exit(2)
+                elif diag.severity == DiagnosticSeverity.Warning and not quiet:
+                    click.echo(f"warning: {path.name}: {diag.message}{loc}", err=True)
+
+        result = compute_diff(
+            img_a, img_b,
+            width=width, height=height,
+            alignment_offset=alignment_offset,
+            min_pixel_count=min_pixels,
+            merge_tolerance=merge_tolerance,
+        )
+
+        lr = LayerDiffResult(
+            name=pair.name,
+            status="matched",
+            layer_type=pair.layer_type.value,
+            changed_pixel_count=result.changed_pixel_count,
+            total_pixel_count=result.total_pixel_count,
+            regions=result.regions,
+        )
+        layer_results.append(lr)
+
+        if verbose:
+            elapsed_layer = time.perf_counter() - t_layer
+            click.echo(
+                f"  {pair.name}: {result.changed_pixel_count} changed px, "
+                f"{len(result.regions)} regions  ({elapsed_layer * 1000:.0f} ms)"
+            )
+            for region in result.regions:
+                click.echo(
+                    f"    region {region.id}: {region.pixel_count} px  "
+                    f"centroid=({region.centroid_x:.4f}, {region.centroid_y:.4f})"
+                )
+
+        # PNG overlay per matched layer
+        if out_png_dir is not None:
+            png_path = out_png_dir / f"{pair.name}_diff.png"
+            try:
+                build_overlay_png(
+                    result.arr_a, result.arr_b, result.xor,
+                    png_path, show_common=png_show_common, overwrite=overwrite,
+                )
+            except FileExistsError as exc:
+                click.echo(f"error: {exc}  (use --overwrite to replace)", err=True)
+                sys.exit(1)
+
+    # Build DiffResult
+    has_changes = any(
+        lr.changed_pixel_count > 0 or lr.status != "matched"
+        for lr in layer_results
+    )
+    diff_result = DiffResult(layers=layer_results, has_changes=has_changes)
+
+    # JSON report
+    if out_json is not None:
+        try:
+            write_report(diff_result, out_json, overwrite=overwrite)
+        except FileExistsError as exc:
+            click.echo(f"error: {exc}  (use --overwrite to replace)", err=True)
+            sys.exit(1)
+
+    elapsed_total = time.perf_counter() - t_start
+
+    # Terminal summary
+    if not quiet:
+        changed_layers = sum(
+            1 for lr in layer_results
+            if lr.changed_pixel_count > 0 or lr.status != "matched"
+        )
+        click.echo(
+            f"diff: {changed_layers}/{len(layer_results)} layers changed  "
+            f"({elapsed_total * 1000:.0f} ms)"
+        )
+        if out_json:
+            click.echo(f"report: {out_json}")
+
+    sys.exit(1 if fail_on_diff and has_changes else 0)
+
+
 if __name__ == "__main__":
     cli()
