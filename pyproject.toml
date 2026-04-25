@@ -9,12 +9,33 @@ description = "Geometry-aware Gerber/Excellon diff tool"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "AGPL-3.0-only"
+authors = [{ name = "Cameron Brooks", email = "cameronbrooks11@gmail.com" }]
+keywords = ["gerber", "excellon", "pcb", "diff", "eda", "kicad", "grbl"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Manufacturing",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
 dependencies = [
     "click>=8",
     "numpy>=1.24",
     "cairocffi>=1.6",
     "scipy>=1.10",
 ]
+
+[project.urls]
+Homepage = "https://github.com/CameronBrooks11/gerberdelta"
+Repository = "https://github.com/CameronBrooks11/gerberdelta"
+Changelog = "https://github.com/CameronBrooks11/gerberdelta/blob/main/CHANGELOG.md"
+Issues = "https://github.com/CameronBrooks11/gerberdelta/issues"
 
 [project.optional-dependencies]
 # Installed by end users who want prettier terminal output
@@ -82,7 +103,7 @@ source = ["gerberdelta"]
 omit   = ["gerberdelta/cli.py"]   # CLI tested via integration; exclude from line-coverage gate
 
 [tool.coverage.report]
-fail_under    = 60    # conservative floor; raise 5 points per milestone
+fail_under    = 85
 exclude_lines = [
     "pragma: no cover",
     "if TYPE_CHECKING:",
