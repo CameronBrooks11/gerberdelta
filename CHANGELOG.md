@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-04-25
+
+### Fixed
+
+- **Excellon integer-format coordinates** -- the parser now correctly handles
+  integer fixed-decimal coordinate encoding produced by Altium, older KiCad,
+  Ultiboard, and most CAM systems. A `_FormatSpec` dataclass captures the
+  zero-suppression convention (`LZ` / `TZ`) and digit counts read from the
+  `METRIC` / `INCH` header line; `_apply_format()` pads and inserts the decimal
+  point accordingly. Explicit digit counts in the header (e.g. `METRIC,LZ,0000.0000`)
+  override the defaults. Coordinates that contain a decimal point are passed
+  through unchanged, preserving full compatibility with KiCad modern output.
+  Files with no format header emit a `DiagnosticSeverity.Warning` and default
+  to `METRIC,TZ` 3.3.
+- 13 new tests in `tests/test_excellon_parser.py` covering `_apply_format` unit
+  tests (decimal pass-through, METRIC LZ 3.3, INCH TZ 2.4, negative coords, zero)
+  and end-to-end round-trips (inline content and two new fixtures:
+  `tests/fixtures/drill-metric-lz.drl`, `tests/fixtures/drill-inch-tz.drl`).
+
 ## [0.15.0] - 2026-04-25
 
 ### Changed

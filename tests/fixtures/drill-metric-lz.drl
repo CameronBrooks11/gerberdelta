@@ -1,0 +1,15 @@
+M48
+; Synthetic fixture: METRIC,LZ integer-format coordinates
+; Coordinate format: 3 integer + 3 decimal digits (3.3), leading zeros suppressed
+; X5000  = LZ pad-left to 6: 005000 -> 005.000 mm = 5.000 mm
+; X10000 = LZ pad-left to 6: 010000 -> 010.000 mm = 10.000 mm
+FMAT,2
+METRIC,LZ
+T01C0.800
+T02C1.000
+%
+T01
+X5000Y10000
+T02
+X10000Y5000
+M30

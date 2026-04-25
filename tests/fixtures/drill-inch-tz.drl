@@ -1,0 +1,15 @@
+M48
+; Synthetic fixture: INCH,TZ integer-format coordinates
+; Coordinate format: 2 integer + 4 decimal digits (2.4), trailing zeros suppressed
+; X01 = TZ pad-right to 6: 010000 -> 01.0000 = 1.0000 inch
+; X02 = TZ pad-right to 6: 020000 -> 02.0000 = 2.0000 inch
+FMAT,2
+INCH,TZ
+T01C0.031
+T02C0.040
+%
+T01
+X01Y02
+T02
+X03Y04
+M30

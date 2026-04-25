@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
 from gerberdelta.types import (
@@ -17,10 +18,76 @@ from gerberdelta.types import (
     UnitType,
 )
 
-# Pattern: optional sign, digits, optional decimal part  (e.g. 111.379 or -71.882)
-_COORD_RE = re.compile(r"[XY]([+-]?\d+(?:\.\d+)?)", re.IGNORECASE)
 _TOOL_DEF_RE = re.compile(r"T(\d+)C([\d.]+)", re.IGNORECASE)
 _TOOL_SEL_RE = re.compile(r"^T(\d+)$", re.IGNORECASE)
+# Matches explicit digit-count specifiers, e.g. "000.000" or "0000.0000"
+_FORMAT_DIGITS_RE = re.compile(r"(\d+)\.(\d+)")
+
+
+@dataclass
+class _FormatSpec:
+    """Excellon coordinate-format specification."""
+
+    unit: UnitType
+    zero_suppression: str  # "LZ" (leading zeros suppressed) or "TZ" (trailing zeros suppressed)
+    integer_digits: int  # digits before the implied decimal point
+    decimal_digits: int  # digits after the implied decimal point
+
+
+def _parse_unit_line(upper: str) -> _FormatSpec:
+    """Parse a METRIC or INCH header line into a _FormatSpec.
+
+    Handles the unit keyword (``METRIC`` / ``INCH``), zero-suppression keyword
+    (``,LZ`` / ``,TZ``), and optional explicit digit counts expressed as a
+    dot-delimited pattern such as ``,000.000`` (3 integer + 3 decimal digits).
+    """
+    if upper.startswith("METRIC"):
+        unit = UnitType.Millimeter
+        int_d, dec_d = 3, 3
+    else:  # INCH
+        unit = UnitType.Inch
+        int_d, dec_d = 2, 4
+
+    zs = "LZ" if ",LZ" in upper else "TZ"
+
+    m = _FORMAT_DIGITS_RE.search(upper)
+    if m:
+        int_d = len(m.group(1))
+        dec_d = len(m.group(2))
+
+    return _FormatSpec(unit=unit, zero_suppression=zs, integer_digits=int_d, decimal_digits=dec_d)
+
+
+def _apply_format(raw: str, spec: _FormatSpec) -> float:
+    """Convert a raw coordinate token to a float in *spec.unit*'s native units.
+
+    If the token contains a decimal point it is used directly (KiCad modern
+    output and any explicit-decimal generator).  Otherwise the integer string
+    is padded according to the zero-suppression convention and the decimal
+    point is inserted at the configured position.
+    """
+    if "." in raw:
+        return float(raw)
+
+    total = spec.integer_digits + spec.decimal_digits
+    sign = ""
+    digits = raw
+    if raw and raw[0] in ("+", "-"):
+        sign = raw[0]
+        digits = raw[1:]
+
+    if spec.zero_suppression == "TZ":
+        # Trailing zeros suppressed in file → right-pad to restore them
+        digits = digits.ljust(total, "0")
+    else:
+        # Leading zeros suppressed in file (LZ) → left-pad to restore them
+        digits = digits.zfill(total)
+
+    if spec.decimal_digits > 0:
+        int_part = digits[: -spec.decimal_digits] or "0"
+        dec_part = digits[-spec.decimal_digits :]
+        return float(f"{sign}{int_part}.{dec_part}")
+    return float(f"{sign}{digits}")
 
 
 def _to_inches(value: float, unit: UnitType) -> float:
@@ -31,14 +98,26 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
     """Parse an Excellon drill file into a ParsedImage.
 
     Tool definitions become ``CircleAperture`` entries in ``image.apertures``.
-    Drill hits become ``Net(aperture_state=Flash)`` entries.
+    Drill hits become ``DrawOp(aperture_state=Flash)`` entries.
     All coordinates are normalised to inches.
+
+    Both decimal-format (KiCad modern) and integer-format (Altium, older KiCad,
+    most CAM systems) coordinate encodings are supported.  The zero-suppression
+    convention and digit counts are read from the ``METRIC``/``INCH`` header
+    line.  If no format header is present, ``METRIC,TZ`` with 3.3 digit counts
+    is assumed and a ``DiagnosticSeverity.Warning`` is emitted.
     """
     lines = content.splitlines()
 
     # ---- mutable state ----
-    unit: UnitType = UnitType.Millimeter  # will be set from header; default metric
-    unit_seen: bool = False
+    # Default: METRIC,TZ 3.3; overwritten when the header declares a format.
+    format_spec = _FormatSpec(
+        unit=UnitType.Millimeter,
+        zero_suppression="TZ",
+        integer_digits=3,
+        decimal_digits=3,
+    )
+    format_seen: bool = False
     apertures: dict[int, CircleAperture] = {}
     nets: list[DrawOp] = []
     bbox = BoundingBox()
@@ -58,7 +137,7 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
         if m:
             tool_num = int(m.group(1))
             dia_raw = float(m.group(2))
-            dia_in = _to_inches(dia_raw, unit)
+            dia_in = _to_inches(dia_raw, format_spec.unit)
             apertures[tool_num] = CircleAperture(diameter=dia_in)
 
     def parse_coord_line(line: str) -> None:
@@ -68,12 +147,14 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
         if tool_m and not line.strip().upper().startswith("T"):
             current_tool = int(tool_m.group(1))
 
-        # KiCad and most generators emit X then Y; some omit one or both
+        # KiCad and most generators emit X then Y; some omit one or both.
+        # The regex captures the raw token (integer or decimal) and _apply_format
+        # handles both explicit-decimal and integer-format coordinates.
         x_val: float | None = None
         y_val: float | None = None
         for letter_match in re.finditer(r"([XY])([+-]?\d+(?:\.\d+)?)", line, re.IGNORECASE):
             letter = letter_match.group(1).upper()
-            val = float(letter_match.group(2))
+            val = _apply_format(letter_match.group(2), format_spec)
             if letter == "X":
                 x_val = val
             elif letter == "Y":
@@ -85,8 +166,8 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
             warn(f"Drill hit with no tool selected (line {lineno})")
             return
 
-        x_in = _to_inches(x_val if x_val is not None else 0.0, unit)
-        y_in = _to_inches(y_val if y_val is not None else 0.0, unit)
+        x_in = _to_inches(x_val if x_val is not None else 0.0, format_spec.unit)
+        y_in = _to_inches(y_val if y_val is not None else 0.0, format_spec.unit)
 
         nets.append(
             DrawOp(
@@ -126,13 +207,10 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
         if in_header:
             upper = line.upper()
 
-            # Unit + zero omission
-            if upper.startswith("METRIC"):
-                unit = UnitType.Millimeter
-                unit_seen = True
-            elif upper.startswith("INCH"):
-                unit = UnitType.Inch
-                unit_seen = True
+            # Unit + zero-suppression + optional digit-count
+            if upper.startswith("METRIC") or upper.startswith("INCH"):
+                format_spec = _parse_unit_line(upper)
+                format_seen = True
             elif upper.startswith("FMAT"):
                 pass  # Excellon format version -- informational
             # Tool definition in header
@@ -164,9 +242,9 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
         if upper.startswith("M"):
             code_s = upper[1:].lstrip("0") or "0"
             if code_s == "71":
-                unit = UnitType.Millimeter
+                format_spec.unit = UnitType.Millimeter
             elif code_s == "72":
-                unit = UnitType.Inch
+                format_spec.unit = UnitType.Inch
             # M30 already handled above; ignore rest
             continue
 
@@ -188,11 +266,11 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
 
         # Anything else: ignore silently (R-codes, comments without ';', etc.)
 
-    if not unit_seen:
+    if not format_seen:
         diagnostics.append(
             Diagnostic(
                 DiagnosticSeverity.Warning,
-                "No unit declaration found; defaulting to METRIC",
+                "No unit declaration found; defaulting to METRIC,TZ 3.3",
                 None,
             )
         )
