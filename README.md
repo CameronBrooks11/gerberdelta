@@ -5,170 +5,55 @@
 [![Python](https://img.shields.io/pypi/pyversions/gerberdelta)](https://pypi.org/project/gerberdelta/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
-Visual raster diff tool for Gerber/Excellon PCB design files -- compare two revisions of a PCB design and highlight what changed.
+Visual raster diff tool for Gerber/Excellon PCB design files.
 
-## Installation
+## Install
 
 ```sh
 pip install gerberdelta
-# with optional rich terminal output:
-pip install "gerberdelta[rich]"
 ```
 
 Requires Python >= 3.11.
 
-## CLI commands
-
-### `parse` -- inspect a single file
+## Quick start
 
 ```sh
-gerberdelta parse board.gbr
-gerberdelta parse board.gbr --dump-ir    # JSON summary to stdout
-gerberdelta parse board.gbr --verbose    # include info-level diagnostics
-```
-
-### `render` -- rasterise a single file to PNG
-
-```sh
-gerberdelta render board.gbr --out-png board.png
-gerberdelta render board.gbr --out-png board.png --width 4096 --height 4096
-gerberdelta render board.gbr --out-png board.png --overwrite
-```
-
-### `diff` -- compare two layer directories
-
-```sh
+# Compare two board revisions
 gerberdelta diff before/ after/
-gerberdelta diff before/ after/ --fail-on-diff          # exit 1 if changes found
-gerberdelta diff before/ after/ --out-json report.json  # machine-readable report
-gerberdelta diff before/ after/ --out-png diff_pngs/    # one overlay PNG per layer
-gerberdelta diff before/ after/ --layer F.Cu --verbose  # restrict to one layer
-gerberdelta diff before/ after/ --align-offset 0.5,0    # shift board B by 0.5 in
+
+# Write a JSON report and overlay PNGs
+gerberdelta diff before/ after/ --out-json report.json --out-png diffs/
+
+# Exit 1 if any changes detected (useful in CI)
+gerberdelta diff before/ after/ --fail-on-diff
 ```
-
-#### diff options
-
-| Option                  | Default | Description                               |
-| ----------------------- | ------- | ----------------------------------------- |
-| `--width` / `--height`  | 2048    | Canvas size in pixels                     |
-| `--min-pixels`          | 4       | Minimum pixel count for a reported region |
-| `--merge-tolerance`     | 0.05    | Region merge padding in inches            |
-| `--layer NAME`          | (all)   | Restrict to named layer (repeatable)      |
-| `--out-json PATH`       | (none)  | Write JSON diff report                    |
-| `--out-png DIR`         | (none)  | Write per-layer overlay PNGs              |
-| `--overwrite`           | false   | Allow overwriting existing output files   |
-| `--png-show-common`     | false   | Shade unchanged geometry grey in PNGs     |
-| `--align-offset X,Y`    | 0,0     | Translate board B before diffing (inches) |
-| `--fail-on-diff`        | false   | Exit 1 if any changes detected            |
-| `--quiet` / `--verbose` | (none)  | Suppress or expand terminal output        |
-
-#### Overlay PNG colour scheme
-
-| Colour | Meaning                                            |
-| ------ | -------------------------------------------------- |
-| Red    | Geometry present in **before** only (removed)      |
-| Green  | Geometry present in **after** only (added)         |
-| Yellow | Geometry changed (both non-zero, different value)  |
-| Grey   | Unchanged geometry (only with `--png-show-common`) |
-
-#### JSON report schema
-
-```json
-{
-  "version": 1,
-  "generator": "gerberdelta",
-  "summary": {
-    "changed_layers": 3,
-    "total_regions": 12,
-    "has_changes": true
-  },
-  "layers": [
-    {
-      "name": "A64-OlinuXino-F.Cu",
-      "status": "matched",
-      "layer_type": "FCu",
-      "changed_pixel_count": 1402,
-      "total_pixel_count": 4194304,
-      "changed_fraction": 0.000334,
-      "regions": [
-        {
-          "id": 1,
-          "centroid_x": 1.234,
-          "centroid_y": 0.987,
-          "bbox": { "min_x": 1.21, "min_y": 0.97, "max_x": 1.26, "max_y": 1.0 },
-          "pixel_count": 84
-        }
-      ]
-    }
-  ]
-}
-```
-
-## Python API
 
 ```python
 import gerberdelta
 from pathlib import Path
 
-# Parse a single file
-img = gerberdelta.parse_gerber(Path("board.gbr").read_text())
-img = gerberdelta.parse_excellon(Path("board.drl").read_text())
-
-# Render to a numpy array -- shape (H, W, 4) uint8 BGRA
-vp = gerberdelta.compute_viewport(img.bounding_box, width=1024, height=1024)
-arr = gerberdelta.render_to_numpy(img, vp)
-
-# Render to a cairocffi ImageSurface (use when you need cairo drawing operations)
-surface = gerberdelta.render_to_surface(img, vp)
-
-# Diff two single-layer images (returns SingleLayerDiff)
-before = gerberdelta.parse_gerber(Path("before/F.Cu.gbr").read_text())
-after  = gerberdelta.parse_gerber(Path("after/F.Cu.gbr").read_text())
-diff = gerberdelta.compute_diff(before, after, width=1024, height=1024)
-print(f"{diff.changed_pixel_count} changed pixels across {len(diff.regions)} regions")
-
-# Diff two full layer directories (returns DiffResult)
-result = gerberdelta.compute_full_diff(
-    Path("before/"),
-    Path("after/"),
-    width=2048,
-    height=2048,
-    alignment_offset=None,   # optional (dx, dy) in inches to shift the after image
-    min_pixel_count=4,       # ignore regions smaller than this
-    merge_tolerance=0.05,    # merge nearby regions within this many inches
-)
-print(f"has_changes={result.has_changes}, layers={len(result.layers)}")
-for layer in result.layers:
-    print(f"  {layer.name}: {layer.changed_pixel_count} px changed ({layer.status})")
+result = gerberdelta.compute_full_diff(Path("before/"), Path("after/"))
+print(f"has_changes={result.has_changes}")
 ```
 
-All public types are importable from the root package:
+## Docs
 
-```python
-from gerberdelta import (
-    ParsedImage, BoundingBox, Viewport,
-    DiffResult, LayerDiffResult, SingleLayerDiff, Region,
-    LayerPair, LayerType, LayerStatus,
-    Diagnostic, DiagnosticSeverity,
-    GerberParseError,
-)
-```
+| Topic              | File                                         |
+| ------------------ | -------------------------------------------- |
+| CLI reference      | [docs/cli.md](docs/cli.md)                   |
+| Python API         | [docs/api.md](docs/api.md)                   |
+| JSON report schema | [docs/schema.md](docs/schema.md)             |
+| Architecture       | [docs/architecture.md](docs/architecture.md) |
 
 ## Known limitations
 
-- **Excellon rout mode (G01/G02/G03):** only drill hits (tool flashes) are rendered.
-  Routing paths produce a `Warning` diagnostic but no geometry.  Boards with routed
-  slots or edge routing will render incompletely.
-
-- **Deprecated RS-274X image-level commands:** `%MI%` (mirror), `%OF%` (offset),
-  `%SF%` (scale), `%AS%` (axis select) are ignored.  Files from older CAD tools
-  (Altium, OrCAD) that rely on these commands will render without the corresponding
-  transforms applied.  An `Info` diagnostic is emitted for each ignored command.
-
-- **Rectangle/obround aperture strokes:** rendered using `max(width, height)` as the
-  stroke width, which is an approximation.  A fully correct Minkowski-sum stroke
-  would require vector geometry work (see `docs/GEOMETRY_DIFF_NOT_IMPLEMENTED.md`).
+- **Excellon rout mode:** only drill hits are rendered; routing paths produce a
+  `Warning` diagnostic but no geometry.
+- **Deprecated RS-274X commands (`%MI%`, `%OF%`, `%SF%`, `%AS%`):** ignored with an
+  `Info` diagnostic.
+- **Rectangle/obround aperture strokes:** rendered using `max(width, height)` as an
+  approximation (see [docs/geometry-diff.md](docs/geometry-diff.md)).
 
 ## Development
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, test, and lint commands.
+See [CONTRIBUTING.md](CONTRIBUTING.md).

@@ -79,7 +79,7 @@ def draw_net_as_stroke(ctx: cairo.Context, net: DrawOp, aperture: Aperture | Non
             # dimension is used for traces where the long axis aligns with the
             # stroke direction (the common case).  A fully correct Minkowski-sum
             # stroke requires geometry-aware rendering; see
-            # docs/GEOMETRY_DIFF_NOT_IMPLEMENTED.md.
+            # docs/geometry-diff.md.
             ctx.set_line_width(max(aperture.width, aperture.height))
             ctx.set_line_cap(cairo.LINE_CAP_SQUARE)
         case ObroundAperture():
