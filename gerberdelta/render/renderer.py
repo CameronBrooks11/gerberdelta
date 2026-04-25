@@ -43,9 +43,9 @@ from gerberdelta.render.viewport import Viewport
 from gerberdelta.types import (
     Aperture,
     BlockAperture,
+    CoordState,
     MacroAperture,
     MirrorState,
-    NetState,
     ParsedImage,
     Polarity,
 )
@@ -230,17 +230,17 @@ def _draw_block_flash(
     The block's nets are in its own coordinate system.  Translating by
     ``(x, y)`` stamps the block at the flash position.
     """
-    if not block_ap.nets:
+    if not block_ap.draw_ops:
         return
 
     # Build a minimal synthetic ParsedImage so compile_render can be reused.
     # Layer states come from the block's own captured layers (at least one).
     layers = block_ap.layers if block_ap.layers else []
     synthetic = ParsedImage(
-        nets=block_ap.nets,
+        draw_ops=block_ap.draw_ops,
         apertures=block_ap.apertures,
         layers=layers,
-        net_states=[NetState()],
+        coord_states=[CoordState()],
         bounding_box=block_ap.bounding_box,
         diagnostics=[],
     )

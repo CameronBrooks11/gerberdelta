@@ -10,9 +10,9 @@ from gerberdelta.types import (
     ArcSegment,
     BlockAperture,
     CircleAperture,
+    DrawOp,
     InterpolationMode,
     MacroAperture,
-    Net,
     ObroundAperture,
     PolygonAperture,
     RectangleAperture,
@@ -42,7 +42,7 @@ def draw_arc_path(ctx: cairo.Context, arc: ArcSegment, clockwise: bool) -> None:
 # ---------------------------------------------------------------------------
 
 
-def draw_net_segment_in_region(ctx: cairo.Context, net: Net) -> None:
+def draw_net_segment_in_region(ctx: cairo.Context, net: DrawOp) -> None:
     """Add one net to the current region path (inside a G36..G37 block).
 
     ``ApertureState.Off`` starts a new contour; arcs use :func:`draw_arc_path`;
@@ -65,7 +65,7 @@ def draw_net_segment_in_region(ctx: cairo.Context, net: Net) -> None:
 # ---------------------------------------------------------------------------
 
 
-def draw_net_as_stroke(ctx: cairo.Context, net: Net, aperture: Aperture | None) -> None:
+def draw_net_as_stroke(ctx: cairo.Context, net: DrawOp, aperture: Aperture | None) -> None:
     """Stroke a single ``On``-state net using the aperture's line width."""
     if aperture is None:
         return
@@ -99,7 +99,7 @@ def draw_net_as_stroke(ctx: cairo.Context, net: Net, aperture: Aperture | None) 
 # ---------------------------------------------------------------------------
 
 
-def draw_flash(ctx: cairo.Context, net: Net, aperture: Aperture | None) -> None:
+def draw_flash(ctx: cairo.Context, net: DrawOp, aperture: Aperture | None) -> None:
     """Draw a flash (D03) at ``net.stop_x``, ``net.stop_y``.
 
     Macro and Block apertures are handled by the renderer directly

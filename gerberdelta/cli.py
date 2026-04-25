@@ -53,7 +53,7 @@ def parse_cmd(file: Path, dump_ir: bool, quiet: bool, verbose: bool) -> None:
             click.echo(f"info: {diag.message}", err=True)
 
     if not quiet and not dump_ir:
-        click.echo(f"nets: {len(img.nets)}")
+        click.echo(f"nets: {len(img.draw_ops)}")
         click.echo(f"apertures: {len(img.apertures)}")
         if img.bounding_box.is_valid:
             bb = img.bounding_box
@@ -68,7 +68,7 @@ def parse_cmd(file: Path, dump_ir: bool, quiet: bool, verbose: bool) -> None:
         bb = img.bounding_box
         ir: dict[str, object] = {
             "source": str(file),
-            "net_count": len(img.nets),
+            "net_count": len(img.draw_ops),
             "aperture_count": len(img.apertures),
             "layer_count": len(img.layers),
             "bounding_box": {
@@ -174,7 +174,7 @@ def render_cmd(
         click.echo(f"rendered {width}x{height} -> {out_png}")
     if verbose:
         click.echo(f"render time: {elapsed * 1000:.1f} ms")
-        click.echo(f"nets: {len(img.nets)}  apertures: {len(img.apertures)}")
+        click.echo(f"nets: {len(img.draw_ops)}  apertures: {len(img.apertures)}")
 
 
 # ---------------------------------------------------------------------------

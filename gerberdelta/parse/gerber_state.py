@@ -18,13 +18,13 @@ from gerberdelta.types import (
     BoundingBox,
     CircleAperture,
     CoordinateMode,
+    CoordState,
     Diagnostic,
     DiagnosticSeverity,
+    DrawOp,
     InterpolationMode,
     LayerState,
     MirrorState,
-    Net,
-    NetState,
     ObroundAperture,
     ParsedImage,
     Polarity,
@@ -88,9 +88,9 @@ class _GerberParser:
         self._fmt: FormatStatement = _DEFAULT_FORMAT
         self._fmt_seen: bool = False
         self._apertures: dict[int, Aperture] = {}
-        self._nets: list[Net] = []
+        self._nets: list[DrawOp] = []
         self._layers: list[LayerState] = [LayerState()]
-        self._net_states: list[NetState] = [NetState()]
+        self._net_states: list[CoordState] = [CoordState()]
         self._bbox: BoundingBox = BoundingBox()
         self._diagnostics: list[Diagnostic] = []
         self._source_path = source_path
@@ -141,7 +141,7 @@ class _GerberParser:
             tuple[
                 int,
                 BlockAperture,
-                list[Net],
+                list[DrawOp],
                 list[LayerState],
                 dict[int, Aperture],
                 BoundingBox,
@@ -269,7 +269,7 @@ class _GerberParser:
                     clockwise,
                 )
 
-        net = Net(
+        net = DrawOp(
             start_x=self._prev_x,
             start_y=self._prev_y,
             stop_x=stop_x,
@@ -307,7 +307,7 @@ class _GerberParser:
         elif value == 36:
             self._in_region_fill = True
             self._nets.append(
-                Net(
+                DrawOp(
                     start_x=self._prev_x,
                     start_y=self._prev_y,
                     stop_x=self._prev_x,
@@ -322,7 +322,7 @@ class _GerberParser:
         elif value == 37:
             self._in_region_fill = False
             self._nets.append(
-                Net(
+                DrawOp(
                     start_x=self._prev_x,
                     start_y=self._prev_y,
                     stop_x=self._prev_x,
@@ -408,7 +408,7 @@ class _GerberParser:
             elif code == "MM":
                 self._unit = UnitType.Millimeter
             # Push a NetState capturing the unit change
-            self._net_states.append(NetState(unit=self._unit))
+            self._net_states.append(CoordState(unit=self._unit))
             self._current_net_state_idx = len(self._net_states) - 1
 
         elif prefix == "AD":
@@ -548,7 +548,7 @@ class _GerberParser:
 
             # Block gets a fresh single-layer state and an empty bbox.
             block_ap.layers.append(LayerState())
-            self._nets = block_ap.nets
+            self._nets = block_ap.draw_ops
             self._layers = block_ap.layers
             self._current_layer_idx = 0
             # Copy parent apertures so the block can reference them.
@@ -698,10 +698,10 @@ class _GerberParser:
             self._info("No format statement found; using default FSLAX25Y25")
 
         return ParsedImage(
-            nets=self._nets,
+            draw_ops=self._nets,
             apertures=self._apertures,
             layers=self._layers,
-            net_states=self._net_states,
+            coord_states=self._net_states,
             bounding_box=self._bbox,
             diagnostics=self._diagnostics,
             source_path=self._source_path,

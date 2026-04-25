@@ -24,10 +24,10 @@ from gerberdelta.types import (
     ApertureState,
     BoundingBox,
     CircleAperture,
+    DrawOp,
     InterpolationMode,
     LayerState,
     MacroAperture,
-    Net,
     ParsedImage,
     Polarity,
     StepAndRepeat,
@@ -45,10 +45,10 @@ _FCU = _FIXTURES / "A64-OlinuXino-F.Cu.gbr"
 
 def _empty_image() -> ParsedImage:
     return ParsedImage(
-        nets=[],
+        draw_ops=[],
         apertures={},
         layers=[LayerState()],
-        net_states=[],
+        coord_states=[],
         bounding_box=BoundingBox(),
         diagnostics=[],
     )
@@ -62,8 +62,8 @@ def _net(
     stop_x: float = 0.1,
     stop_y: float = 0.1,
     layer_index: int = 0,
-) -> Net:
-    return Net(
+) -> DrawOp:
+    return DrawOp(
         start_x=stop_x,
         start_y=stop_y,
         stop_x=stop_x,
@@ -76,15 +76,15 @@ def _net(
     )
 
 
-def _image_with_nets(nets: list[Net], apertures: dict[int, Aperture] | None = None) -> ParsedImage:
+def _image_with_nets(nets: list[DrawOp], apertures: dict[int, Aperture] | None = None) -> ParsedImage:
     bb = BoundingBox()
     for n in nets:
         bb.expand(n.stop_x, n.stop_y)
     return ParsedImage(
-        nets=nets,
+        draw_ops=nets,
         apertures=apertures or {10: CircleAperture(diameter=0.01)},
         layers=[LayerState()],
-        net_states=[],
+        coord_states=[],
         bounding_box=bb,
         diagnostics=[],
     )

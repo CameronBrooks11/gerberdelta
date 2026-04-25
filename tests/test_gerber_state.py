@@ -15,7 +15,7 @@ def test_parse_minimal() -> None:
     content = "%FSLAX25Y25*%%MOMM*%%ADD10C,1.0*%G01*X100000Y100000D01*M02*"
     img = parse_gerber(content)
     assert img.bounding_box.is_valid
-    assert len(img.nets) > 0
+    assert len(img.draw_ops) > 0
     assert not any(d.severity == DiagnosticSeverity.Error for d in img.diagnostics)
 
 
@@ -60,7 +60,7 @@ def test_region_fill_markers_in_net_list() -> None:
     img = parse_gerber(content)
     from gerberdelta.types import InterpolationMode
 
-    modes = [n.interpolation for n in img.nets]
+    modes = [n.interpolation for n in img.draw_ops]
     assert InterpolationMode.RegionStart in modes
     assert InterpolationMode.RegionEnd in modes
 
@@ -69,7 +69,7 @@ def test_aperture_select_does_not_emit_net() -> None:
     # D10 (aperture select) alone should NOT produce a drawing net
     content = "%FSLAX25Y25*%%MOIN*%%ADD10C,0.001*%D10*M02*"
     img = parse_gerber(content)
-    assert len(img.nets) == 0
+    assert len(img.draw_ops) == 0
 
 
 def test_multiple_apertures_defined() -> None:
@@ -88,7 +88,7 @@ def test_linear_draw_sequence() -> None:
     content = "%FSLAX25Y25*%%MOIN*%D10*X0Y0D02*X10000Y0D01*X10000Y10000D01*X0Y10000D01*M02*"
     img = parse_gerber(content)
     # D02 (move) + 3x D01 (draw) = 4 nets total
-    assert len(img.nets) == 4
+    assert len(img.draw_ops) == 4
 
 
 def test_source_path_stored() -> None:

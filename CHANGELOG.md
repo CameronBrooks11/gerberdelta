@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-04-25
+
+### Changed
+
+- **Domain model rename** -- `Net` renamed to `DrawOp` and `NetState` renamed to `CoordState`
+  throughout the codebase. The term "net" belongs to EDA net-list semantics; the IR types
+  represent drawing primitives and coordinate-system snapshots, not electrical nets.
+  - `ParsedImage.nets` → `draw_ops`
+  - `ParsedImage.net_states` → `coord_states`
+  - `BlockAperture.nets` → `draw_ops`
+  All public and internal references updated; import order re-sorted (ruff I001).
+
 ## [0.14.0] - 2026-04-25
 
 ### Added

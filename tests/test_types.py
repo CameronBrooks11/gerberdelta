@@ -9,13 +9,13 @@ from gerberdelta.types import (
     ApertureType,
     BoundingBox,
     CircleAperture,
+    CoordState,
     DiffResult,
+    DrawOp,
     InterpolationMode,
     LayerDiffResult,
     LayerState,
     MirrorState,
-    Net,
-    NetState,
     ParsedImage,
     Polarity,
     Region,
@@ -63,7 +63,7 @@ def test_layer_state_defaults() -> None:
 
 
 def test_net_state_defaults() -> None:
-    ns = NetState()
+    ns = CoordState()
     assert ns.unit is UnitType.Inch
     assert ns.mirror_state is MirrorState.None_
     assert ns.scale_a == pytest.approx(1.0)
@@ -74,15 +74,15 @@ def test_net_state_defaults() -> None:
 
 def test_parsed_image_empty() -> None:
     pi = ParsedImage(
-        nets=[],
+        draw_ops=[],
         apertures={},
         layers=[],
-        net_states=[],
+        coord_states=[],
         bounding_box=BoundingBox(),
         diagnostics=[],
     )
     assert pi.source_path is None
-    assert not pi.nets
+    assert not pi.draw_ops
     assert not pi.apertures
     assert not pi.bounding_box.is_valid
 
@@ -123,7 +123,7 @@ def test_aperture_type_discriminator() -> None:
 
 
 def test_net_construction() -> None:
-    net = Net(
+    net = DrawOp(
         start_x=0.0,
         start_y=0.0,
         stop_x=1.0,

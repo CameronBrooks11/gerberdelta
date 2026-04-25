@@ -15,22 +15,22 @@ def test_parse_minimal_excellon() -> None:
     img = parse_excellon(content)
     assert 1 in img.apertures
     assert img.apertures[1].aperture_type == ApertureType.Circle
-    assert len(img.nets) == 1
-    assert img.nets[0].aperture_state == ApertureState.Flash
+    assert len(img.draw_ops) == 1
+    assert img.draw_ops[0].aperture_state == ApertureState.Flash
 
 
 def test_excellon_coordinates_in_inches() -> None:
     # 25.4 mm -> 1.0 inch
     content = "M48\nMETRIC,LZ\nT01C25.4\n%\nT01\nX25.4Y0.0\nM30\n"
     img = parse_excellon(content)
-    assert abs(img.nets[0].stop_x - 1.0) < 1e-6
+    assert abs(img.draw_ops[0].stop_x - 1.0) < 1e-6
 
 
 def test_excellon_inch_unit_unchanged() -> None:
     content = "M48\nINCH,LZ\nT01C0.1\n%\nT01\nX1.0Y0.5\nM30\n"
     img = parse_excellon(content)
-    assert abs(img.nets[0].stop_x - 1.0) < 1e-6
-    assert abs(img.nets[0].stop_y - 0.5) < 1e-6
+    assert abs(img.draw_ops[0].stop_x - 1.0) < 1e-6
+    assert abs(img.draw_ops[0].stop_y - 0.5) < 1e-6
 
 
 def test_excellon_bbox_valid() -> None:
@@ -44,20 +44,20 @@ def test_excellon_multiple_tools() -> None:
     img = parse_excellon(content)
     assert 1 in img.apertures
     assert 2 in img.apertures
-    assert len(img.nets) == 2
+    assert len(img.draw_ops) == 2
 
 
 def test_excellon_m30_stops_parsing() -> None:
     content = "M48\nMETRIC,LZ\nT01C0.3\n%\nT01\nX1.0Y1.0\nM30\nX99.0Y99.0\n"
     img = parse_excellon(content)
     # Only the hit before M30 should appear
-    assert len(img.nets) == 1
+    assert len(img.draw_ops) == 1
 
 
 def test_excellon_comment_lines_skipped() -> None:
     content = "M48\n;This is a comment\nMETRIC,LZ\nT01C0.5\n%\nT01\nX1.0Y1.0\nM30\n"
     img = parse_excellon(content)
-    assert len(img.nets) == 1
+    assert len(img.draw_ops) == 1
     assert not any(d.severity == DiagnosticSeverity.Error for d in img.diagnostics)
 
 

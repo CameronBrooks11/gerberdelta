@@ -7,8 +7,8 @@ from gerberdelta.types import (
     ApertureState,
     ArcSegment,
     CircleAperture,
+    DrawOp,
     InterpolationMode,
-    Net,
     ObroundAperture,
     PolygonAperture,
     RectangleAperture,
@@ -24,8 +24,8 @@ def _make_ctx(w: int = 100, h: int = 100) -> tuple[cairo.Context, cairo.ImageSur
     return ctx, surface
 
 
-def _flash_net() -> Net:
-    return Net(
+def _flash_net() -> DrawOp:
+    return DrawOp(
         start_x=0.0,
         start_y=0.0,
         stop_x=5.0,
@@ -38,8 +38,8 @@ def _flash_net() -> Net:
     )
 
 
-def _stroke_net() -> Net:
-    return Net(
+def _stroke_net() -> DrawOp:
+    return DrawOp(
         start_x=1.0,
         start_y=1.0,
         stop_x=4.0,

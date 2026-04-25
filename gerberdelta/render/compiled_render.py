@@ -27,10 +27,10 @@ from gerberdelta.types import (
     ApertureState,
     BlockAperture,
     CircleAperture,
+    DrawOp,
     InterpolationMode,
     MacroAperture,
     MirrorState,
-    Net,
     ObroundAperture,
     ParsedImage,
     Polarity,
@@ -50,7 +50,7 @@ class FlashBatch:
 
     kind: Literal["flash_batch"] = field(default="flash_batch", init=False)
     aperture_code: int = 0
-    nets: list[Net] = field(default_factory=list)
+    nets: list[DrawOp] = field(default_factory=list)
 
 
 @dataclass
@@ -59,7 +59,7 @@ class StrokeBatch:
 
     kind: Literal["stroke_batch"] = field(default="stroke_batch", init=False)
     aperture_code: int = 0
-    nets: list[Net] = field(default_factory=list)
+    nets: list[DrawOp] = field(default_factory=list)
 
 
 @dataclass
@@ -67,7 +67,7 @@ class RegionGroup:
     """Contiguous region fill bounded by G36/G37 markers."""
 
     kind: Literal["region_group"] = field(default="region_group", init=False)
-    nets: list[Net] = field(default_factory=list)
+    nets: list[DrawOp] = field(default_factory=list)
 
 
 @dataclass
@@ -76,7 +76,7 @@ class HoledFlash:
 
     kind: Literal["holed_flash"] = field(default="holed_flash", init=False)
     aperture_code: int = 0
-    net: Net | None = None
+    net: DrawOp | None = None
 
 
 @dataclass
@@ -85,7 +85,7 @@ class MacroFlash:
 
     kind: Literal["macro_flash"] = field(default="macro_flash", init=False)
     aperture_code: int = 0
-    net: Net | None = None
+    net: DrawOp | None = None
 
 
 @dataclass
@@ -94,7 +94,7 @@ class BlockFlash:
 
     kind: Literal["block_flash"] = field(default="block_flash", init=False)
     aperture_code: int = 0
-    net: Net | None = None
+    net: DrawOp | None = None
 
 
 CompiledGroup = FlashBatch | StrokeBatch | RegionGroup | HoledFlash | MacroFlash | BlockFlash
@@ -177,7 +177,7 @@ def compile_render(parsed_image: ParsedImage) -> CompiledRender:
         _flush_stroke()
         batch_layer = new_layer
 
-    for net in parsed_image.nets:
+    for net in parsed_image.draw_ops:
         layer = layer_map.get(net.layer_index)
         if layer is None:
             continue

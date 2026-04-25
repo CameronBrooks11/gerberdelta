@@ -30,10 +30,10 @@ _FCU_AFTER = _FIXTURES_AFTER / "A64-OlinuXino-F.Cu.gbr"
 
 def _empty_image() -> ParsedImage:
     return ParsedImage(
-        nets=[],
+        draw_ops=[],
         apertures={},
         layers=[LayerState()],
-        net_states=[],
+        coord_states=[],
         bounding_box=BoundingBox(),
         diagnostics=[],
     )

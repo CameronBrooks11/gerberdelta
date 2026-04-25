@@ -142,7 +142,7 @@ class LayerState:
 
 
 @dataclass
-class NetState:
+class CoordState:
     """Snapshot of global image-level state at the time a net was emitted.
 
     ``unit`` is stored for diagnostic/display purposes only.  All coordinates
@@ -159,7 +159,7 @@ class NetState:
 
 
 @dataclass
-class Net:
+class DrawOp:
     """A single drawing operation.  All coordinates in inches."""
 
     start_x: float
@@ -230,7 +230,7 @@ class MacroAperture:
 @dataclass
 class BlockAperture:
     aperture_type: Literal[ApertureType.Block] = ApertureType.Block
-    nets: list[Net] = field(default_factory=list)
+    draw_ops: list[DrawOp] = field(default_factory=list)
     apertures: dict[int, Aperture] = field(default_factory=dict)
     layers: list[LayerState] = field(default_factory=list)
     bounding_box: BoundingBox = field(default_factory=BoundingBox)
@@ -256,10 +256,10 @@ Aperture: TypeAlias = (
 class ParsedImage:
     """The complete output of parsing one Gerber or Excellon file."""
 
-    nets: list[Net]
+    draw_ops: list[DrawOp]
     apertures: dict[int, Aperture]  # D-code -> aperture
     layers: list[LayerState]
-    net_states: list[NetState]
+    coord_states: list[CoordState]
     bounding_box: BoundingBox
     diagnostics: list[Diagnostic]
     source_path: Path | None = None

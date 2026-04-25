@@ -13,9 +13,9 @@ from gerberdelta.types import (
     BlockAperture,
     BoundingBox,
     CircleAperture,
+    CoordState,
+    DrawOp,
     LayerState,
-    Net,
-    NetState,
     ParsedImage,
 )
 
@@ -68,9 +68,9 @@ def test_block_aperture_nets_captured() -> None:
     img = parse_gerber(src)
     block = img.apertures[10]
     assert isinstance(block, BlockAperture)
-    assert len(block.nets) == 2
+    assert len(block.draw_ops) == 2
     # Flash nets
-    assert all(n.aperture_state == ApertureState.Flash for n in block.nets)
+    assert all(n.aperture_state == ApertureState.Flash for n in block.draw_ops)
 
 
 def test_block_aperture_nets_not_in_parent() -> None:
@@ -84,7 +84,7 @@ def test_block_aperture_nets_not_in_parent() -> None:
     )
     img = parse_gerber(src)
     # Parent nets list should be empty (no drawing outside the block)
-    assert len(img.nets) == 0
+    assert len(img.draw_ops) == 0
 
 
 def test_block_aperture_has_layers() -> None:
@@ -156,7 +156,7 @@ def test_block_flash_in_parent_compiles_to_block_flash() -> None:
         "X50000Y50000D03*",  # flash block in parent
     )
     img = parse_gerber(src)
-    assert len(img.nets) == 1  # one flash in parent
+    assert len(img.draw_ops) == 1  # one flash in parent
     cr = compile_render(img)
     groups = [g for layer in cr.layers for g in layer.groups]
     block_flashes = [g for g in groups if isinstance(g, BlockFlash)]
@@ -228,7 +228,7 @@ def test_empty_gerber_no_crash() -> None:
     """Parsing and rendering an empty (geometry-less) gerber is safe."""
     src = "%FSLAX25Y25*%\n%MOIN*%\nM02*\n"
     img = parse_gerber(src)
-    assert len(img.nets) == 0
+    assert len(img.draw_ops) == 0
     assert not img.bounding_box.is_valid
     vp = compute_viewport(img.bounding_box, 128, 128)
     surface = render_to_surface(img, vp)
@@ -269,7 +269,7 @@ def test_negative_coordinate_render_non_empty() -> None:
     """A gerber with negative coordinates produces non-transparent pixels."""
     # Build a ParsedImage with a flash at (-1.0, -1.0)
     ap: dict[int, object] = {10: CircleAperture(diameter=0.1)}
-    net = Net(
+    net = DrawOp(
         start_x=-1.0,
         start_y=-1.0,
         stop_x=-1.0,
@@ -285,10 +285,10 @@ def test_negative_coordinate_render_non_empty() -> None:
     bbox = BoundingBox()
     bbox.expand(-1.0, -1.0, 0.05)
     img = ParsedImage(
-        nets=[net],
+        draw_ops=[net],
         apertures=ap,  # type: ignore[arg-type]
         layers=[LayerState()],
-        net_states=[NetState()],
+        coord_states=[CoordState()],
         bounding_box=bbox,
         diagnostics=[],
     )

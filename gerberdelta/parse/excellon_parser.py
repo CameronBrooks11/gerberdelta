@@ -7,12 +7,12 @@ from gerberdelta.types import (
     ApertureState,
     BoundingBox,
     CircleAperture,
+    CoordState,
     Diagnostic,
     DiagnosticSeverity,
+    DrawOp,
     InterpolationMode,
     LayerState,
-    Net,
-    NetState,
     ParsedImage,
     UnitType,
 )
@@ -40,12 +40,12 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
     unit: UnitType = UnitType.Millimeter  # will be set from header; default metric
     unit_seen: bool = False
     apertures: dict[int, CircleAperture] = {}
-    nets: list[Net] = []
+    nets: list[DrawOp] = []
     bbox = BoundingBox()
     diagnostics: list[Diagnostic] = []
     current_tool: int = 0
     layer = LayerState()
-    net_state = NetState()
+    net_state = CoordState()
 
     in_header: bool = False
     lineno: int = 0
@@ -89,7 +89,7 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
         y_in = _to_inches(y_val if y_val is not None else 0.0, unit)
 
         nets.append(
-            Net(
+            DrawOp(
                 start_x=x_in,
                 start_y=y_in,
                 stop_x=x_in,
@@ -198,10 +198,10 @@ def parse_excellon(content: str, source_path: Path | None = None) -> ParsedImage
         )
 
     return ParsedImage(
-        nets=nets,
+        draw_ops=nets,
         apertures=dict(apertures),
         layers=[layer],
-        net_states=[net_state],
+        coord_states=[net_state],
         bounding_box=bbox,
         diagnostics=diagnostics,
         source_path=source_path,
