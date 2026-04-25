@@ -15,7 +15,7 @@ from gerberdelta.types import (
 )
 
 if TYPE_CHECKING:
-    from gerberdelta.parse.macro_parser import MacroDef  # type: ignore[import-untyped]
+    from gerberdelta.parse.macro_parser import MacroDef
 
 
 @dataclass
